@@ -9,12 +9,14 @@ from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from flask import url_for
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # For local testing ONLY
 
 app = Flask("DevAndar")
 app.secret_key = "olasuperseguro"
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 GOOGLE_CLIENT_ID = "582976854264-7ofqk8mngef34ndt2qc6tvvu71t97r00.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="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"
+GOOGLE_REDIRECT_URI="http://127.0.0.1:80/callback"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
 def log_check(function):
@@ -81,4 +83,4 @@ def logout():
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80, debug=True)
+    app.run(host="127.0.0.1", port=80, debug=True)

@@ -3,6 +3,9 @@ from google_auth import log_check, login, handle_callback
 
 app = Flask("DevAndar")
 app.secret_key = "olasuperseguro"
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
 
 @app.route("/")
 def index():

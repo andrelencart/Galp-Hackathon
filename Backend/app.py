@@ -1,5 +1,6 @@
 from flask import Flask, session, redirect
 from google_auth import log_check, login, handle_callback
+from auth import auth_bp, bcrypt, mysql
 
 app = Flask("DevAndar")
 app.secret_key = "olasuperseguro"
@@ -7,11 +8,19 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 
-@app.route("/")
-def index():
-    return "<a href='/login'><button>Login with Google</button></a>"
+app.register_blueprint(auth_bp)
+bcrypt.init_app(app)
+mysql.init_app(app)
 
-@app.route("/login")
+@app.route("/")
+def home():
+    return '''
+        <button onclick="location.href='login'">Login</button>
+        <button onclick="location.href='signup'">Sign Up</button>
+        <button onclick="location.href='google_login'">Login with Google</button>
+    '''
+
+@app.route("/google_login")
 def login_route():
     return login()
 

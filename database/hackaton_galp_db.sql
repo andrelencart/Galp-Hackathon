@@ -59,6 +59,7 @@ CREATE TABLE `Profile` (
   `location` varchar(255) DEFAULT NULL,
   `activity` varchar(255) DEFAULT NULL,
   `city` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

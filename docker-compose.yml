@@ -9,12 +9,13 @@ services:
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
     ports:
-      - "5000:5000"
+      - "5000:80"
     networks:
       - my_custom_network
     depends_on:
       - db
     restart: unless-stopped
+    command: gunicorn -b 0.0.0.0:80 app:app
   
 
   # frontend:
@@ -39,6 +40,8 @@ services:
       - ./database/hackaton_galp_db.sql:/docker-entrypoint-initdb.d/hackaton_galp_db.sql
     expose:
       - "3306"
+    ports:
+      - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

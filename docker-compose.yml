@@ -2,7 +2,7 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: ./Backend
     environment:
       DB_HOST: db
       DB_USER: root
@@ -17,14 +17,14 @@ services:
     restart: unless-stopped
   
 
-  frontend:
-    build:
-      context: ./frontend
-    ports:
-      - "3000:3000"
-    networks:
-      - my_custom_network
-    restart: unless-stopped
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - my_custom_network
+  #   restart: unless-stopped
 
 
   db:

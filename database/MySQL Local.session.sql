@@ -22,3 +22,4 @@ ALTER TABLE running_log
 	 Drop COLUMN submitted_at;
 
 
+ALTER TABLE running_log ADD COLUMN proof_image_url VARCHAR(512);

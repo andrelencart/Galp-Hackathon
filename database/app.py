@@ -3,6 +3,11 @@ from flask_talisman import Talisman
 from handlers.user import register_user, add_run_entry
 from handlers.proof import proof_bp
 from datetime import date
+from dotenv import load_dotenv
+from handlers.upload import upload_bp
+
+app.register_blueprint(upload_bp)
+load_dotenv()
 
 app = Flask(__name__)
 Talisman(app)

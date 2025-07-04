@@ -10,7 +10,7 @@ def register_user(form):
     cursor = None
     try:
         conn = mysql.connector.connect(
-            host="localhost",
+            host="db",
             user="root",
             password="Root123@",
             database="User_db"
@@ -35,7 +35,7 @@ def add_run_entry(form):
     run_date = form["date"]
     distance = form["distance_km"]
     conn = mysql.connector.connect(
-        host="localhost",
+        host="db",
         user="root",
         password="Root123@",
         database="User_db"

@@ -1,0 +1,52 @@
+.fullscreen {
+  min-width: 1920px;
+  min-height: 1080px;
+  width: 100vw;
+  height: 100vh;
+  background: #222;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.centeredContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pageTitle {
+  font-size: 2.8rem;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+.instructions {
+  font-size: 1.35rem;
+  margin-bottom: 2.5rem;
+  text-align: left;
+  padding-left: 1.25rem;
+}
+.buttonRow {
+  display: flex;
+  gap: 2rem;
+}
+.btn {
+  background: #fff;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn:hover {
+  background: #f0a500;
+  color: #fff;
+}

@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template_string
-from handlers.user import register_user, add_run_entry
+from user import register_user, add_run_entry
 # from handlers.proof import proof_bp
 from datetime import date
 # from dotenv import load_dotenv

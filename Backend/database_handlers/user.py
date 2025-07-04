@@ -17,8 +17,8 @@ def register_user(form):
         )
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO profile (name, email, country, district) VALUES (%s, %s, %s, %s)",
-            (name, email, country, district)
+            "INSERT INTO Profile (name, email, group_type, location, activity, city, password) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (name, email, location, city)
         )
         conn.commit()
         return "Registration successful!"
@@ -41,12 +41,12 @@ def add_run_entry(form):
         database="User_db"
     )
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM profile WHERE email=%s", (email,))
+    cursor.execute("SELECT id FROM Profile WHERE email=%s", (email,))
     result = cursor.fetchone()
     if result:
         profile_id = result[0]
         cursor.execute(
-            "INSERT INTO running_log (profile_id, date, distance_km) VALUES (%s, %s, %s)",
+            "INSERT INTO Running_logs (profile_id, date, distance_km) VALUES (%s, %s, %s)",
             (profile_id, run_date, distance)
         )
         conn.commit()

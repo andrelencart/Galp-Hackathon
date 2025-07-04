@@ -1,7 +1,7 @@
 from flask import Flask, session, redirect
 from google_auth import log_check, login, handle_callback
 from auth import auth_bp, bcrypt, mysql
-
+from img_to_text import image_to_text_bp
 
 app = Flask("DevAndar")
 app.secret_key = "olasuperseguro"
@@ -11,6 +11,7 @@ app.config['MYSQL_PASSWORD'] = 'Roo123@'
 app.config['MYSQL_DB'] = 'testing'
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(image_to_text_bp)
 bcrypt.init_app(app)
 mysql.init_app(app)
 
@@ -45,4 +46,4 @@ def logout():
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=80, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True)

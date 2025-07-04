@@ -1,10 +1,12 @@
-from flask import Flask, session, redirect
+from flask import Flask, session, redirect, Blueprint, request, jsonify
 from google_auth import log_check, login, handle_callback
 from auth import auth_bp, bcrypt, mysql
 from img_to_text import image_to_text_bp
+from captcha import verify_recaptcha
 
 app = Flask("DevAndar")
 app.secret_key = "olasuperseguro"
+app.config["RECAPTCHA_SECRET_KEY"] = "YOUR_SECRET_KEY"
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'Roo123@'
@@ -17,6 +19,10 @@ mysql.init_app(app)
 
 @app.route("/")
 def home():
+    # data = request.json
+    # recaptcha_token = data.get('recaptchaToken')
+    # if not recaptcha_token or not verify_recaptcha(recaptcha_token):
+    #     return jsonify({'error': 'Invalid CAPTCHA'}), 400
     return '''
         <button onclick="location.href='/auth/login'">Login</button>
         <button onclick="location.href='/auth/signup'">Sign Up</button>

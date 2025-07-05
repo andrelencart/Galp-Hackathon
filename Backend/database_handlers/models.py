@@ -23,7 +23,8 @@ class Guest(Base):
     district = Column(String(255), nullable=True)
     council = Column(String(255), nullable=True)
     activity = Column(String(255), nullable=True)
-    city = Column(String(255), nullable=True)
+    # city = Column(String(255), nullable=True)
+    country = Column(String(255), nullable=True)
 
     # Relationship to Running_logs
     running_logs = relationship("RunningLogs", back_populates="guest")
@@ -38,8 +39,10 @@ class Profile(Base):
     district = Column(String(255), nullable=True)
     council = Column(String(255), nullable=True)
     activity = Column(String(255), nullable=True)
-    city = Column(String(255), nullable=True)
+    # city = Column(String(255), nullable=True)
     password = Column(String(255), nullable=True)
+    country = Column(String(255), nullable=True)
+    google_id = Column(String(255), nullable=True, unique=True)
 
     # Relationship to Running_logs
     running_logs = relationship("RunningLogs", back_populates="profile")

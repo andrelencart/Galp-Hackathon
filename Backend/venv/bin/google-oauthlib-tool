@@ -1,4 +1,4 @@
-#!/home/scorpot/Desktop/DevAndar/Backend/venv/bin/python3
+#!/home/henrique-reis/galp/DevAndar---Galp/Backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

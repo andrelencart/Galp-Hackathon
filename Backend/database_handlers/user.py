@@ -54,11 +54,15 @@ def add_run_entry(data):
     email = data.get("run_email")
     run_date = data.get("date")
     distance = data.get("distance_km")
+    steps = data.get("steps")  # new field
     session = SessionLocal()
     try:
         profile = session.query(Profile).filter_by(email=email).first()
         if not profile:
             return {"message": "Profile not found. Please register first."}, 404
+
+        if not distance and steps:
+            distance = round(int(steps) / 1312, 2)
 
         run_log = RunningLogs(
             profile_id=profile.id,

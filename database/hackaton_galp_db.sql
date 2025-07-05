@@ -30,7 +30,7 @@ CREATE TABLE `Guest` (
   `district` varchar(255) DEFAULT NULL,
   `council` varchar(255) DEFAULT NULL,
   `activity` varchar(255) DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -60,12 +60,13 @@ CREATE TABLE `Profile` (
   `district` varchar(255) DEFAULT NULL,
   `council` varchar(255) DEFAULT NULL,
   `activity` varchar(255) DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `google_id` (`google_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `Profile`

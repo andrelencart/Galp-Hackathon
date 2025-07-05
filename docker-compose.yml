@@ -4,6 +4,8 @@ services:
     build:
       context: ./Backend
     environment:
+      FLASK_APP: database_handlers/main.py
+      FLASK_ENV: development
       DB_HOST: db
       DB_USER: root
       DB_PASS: ${DB_PASS}
@@ -19,7 +21,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     command: gunicorn -b 0.0.0.0:5000 database_handlers.main:app
-  
+    # command: flask run --host=0.0.0.0 --port=5000
+    volumes:
+      - image_data:/data/images
 
   frontend:
     build:
@@ -57,7 +61,8 @@ services:
 
 volumes:
   mysql_data:
- 
+  image_data:
+
 networks:
   my_custom_network:
     driver: bridge

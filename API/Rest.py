@@ -41,16 +41,14 @@ def register():
 	data = request.json
 	username = data.get('username')
 	password = data.get('password')
-	country = data.get('country')
 	district = data.get('district')
 	council = data.get('council')
 
-	if country not in COUNTRIES_AND_DISTRICTS:
-		return jsonify({"message": f"Invalid country. Supported countries: {', '.join(COUNTRIES_AND_DISTRICTS.keys())}"}), 400
+	country = "Portugal"
 	
-	if country = "Portugal":
 		if district not in COUNTRIES_AND_DISTRICTS["Portugal"]
 			return jsonify({"message": f"Invalid district. Supported districts for Portugal: {', '.join(COUNTRIES_AND_DISTRICTS['Portugal'].keys())}"}), 400
+
 		if council not in COUNTRIES_AND_DISTRICTS["Portugal"][district]:
             return jsonify({"message": f"Invalid council for district {district}. Supported councils: {', '.join(COUNTRIES_AND_DISTRICTS['Portugal'][district])}"}), 400
 
@@ -58,11 +56,44 @@ def register():
 		if user['username'] == username:
 			return jsonify({"message": "User already exists"}), 400
 
+	usrequest.jsoners.append({
+		"username": username,
+		"password": password,
+		"country": country,
+		"district": district,
+		"council": council
+	})
+
+	return jsonify({"message": "User registered successfully"}), 201
+
+@app.route('/auth/register/galp', methods=['POST'])
+def register_galp():
+	data = request.json
+	username = data.get('username')
+	password = data.get('password')
+	country = data.get('country')
+	district = data.get('district')
+	country = data.get('country')
+
+	if country not in COUNTRIES_AND_DISTRICTS
+		return jsonify ({"message": f"Invalid country. Supported countrys: {', '. join(COUNTRIES_AND_DISTRICTS.keys())}"}), 400
+
+	if country == "Portugal"
+		if district not in COUNTRIES_AND_DISTRICTS["Portugal"]
+			return jsonify({"message": f"Invalid district. Supported districts for Portugal: {', '.join(COUNTRIES_AND_DISTRICTS['Portugal'].keys())}"}), 400
+		if council not in COUNTRIES_AND_DISTRICTS["Portugal"][district]:
+            return jsonify({"message": f"Invalid council for district {district}. Supported councils: {', '.join(COUNTRIES_AND_DISTRICTS['Portugal'][district])}"}), 400
+	
+	for user in users:
+		if user['username'] == username:
+			return jsonify({"message": "User already exists"}), 400
+	
 	users.append({
 		"username": username,
 		"password": password,
 		"country": country,
-		"district": district if country = 
+		"district": district,
+		"council": council
 	})
 
 	return jsonify({"message": "User registered successfully"}), 201
@@ -99,6 +130,7 @@ def galp_login():
 	data = request.json
 	email = data.get('email')
 	password = data.get('password')
+
 
 	if email and email.endswith('@galp.com'):
 		for user in users:

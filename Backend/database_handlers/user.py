@@ -3,29 +3,54 @@ from models import Profile, RunningLogs
 from db import SessionLocal
 from datetime import datetime
 from flask_bcrypt import Bcrypt
-from flask import request, jsonify
+from flask import sonify
+from countries import COUNTRIES_AND_DISTRICTS
 
 bcrypt = Bcrypt()
 
-def register_user(form):
-    name = form["name"]
-    email = form["email"]
-    password = form.get("password")
-    
-    if not password:
-        return "Password is required."
+
+@app.route('/auth/register', methods=['POST'])
+def register_api():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    country = data.get('country')
+    district = data.get('district')
+    council = data.get('council')
+
+    # Validate required fields
+    if not all([name, email, password, district, council]):
+        return jsonify({"message": "All fields are required: name, email, password, district, council."}), 400
+
+    # Validate country, district and council
+    if country not in COUNTRIES_AND_DISTRICTS or not COUNTRIES_AND_DISTRICTS[country]:
+        return jsonify({"message": f"Invalid or unsupported country: {country}"}), 400
+
+    if district not in COUNTRIES_AND_DISTRICTS[country]:
+        return jsonify({"message": f"Invalid district. Supported districts for {country}: {', '.join(COUNTRIES_AND_DISTRICTS[country].keys())}"}), 400
+
+    if council not in COUNTRIES_AND_DISTRICTS[country][district]:
+        return jsonify({"message": f"Invalid council for district {district}. Supported councils: {', '.join(COUNTRIES_AND_DISTRICTS[country][district])}"}), 400
 
     session = SessionLocal()
     try:
         existing = session.query(Profile).filter_by(email=email).first()
         if existing:
-            return "Email already registered."
+            return jsonify({"message": "Email already registered."}), 400
 
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        profile = Profile(name=name, email=email, password=hashed_pw)
+        profile = Profile(
+            name=name,
+            email=email,
+            password=hashed_pw,
+            country=country,
+            district=district,
+            council=council
+        )
         session.add(profile)
         session.commit()
-        return "Registration successful!"
+        return jsonify({"message": "Registration successful!"}), 201
     finally:
         session.close()
 

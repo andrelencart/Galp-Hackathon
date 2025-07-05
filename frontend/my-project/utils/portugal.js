@@ -1,5 +1,3 @@
-// Full list of Portuguese districts and their councils (municípios)
-
 export const districts = [
   "Aveiro",
   "Beja",

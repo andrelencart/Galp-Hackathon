@@ -87,3 +87,21 @@ export default function AuthBox({ type = "main" }) {
 
   return null;
 }
+
+export async function submitData(title, description) {
+  const res = await fetch("http://localhost:5000/submit", {  // Replace with your backend submit endpoint
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title, description }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Submission failed");
+  }
+
+  return data;
+}

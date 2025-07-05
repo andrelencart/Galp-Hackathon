@@ -110,7 +110,6 @@ def get_image(filename):
 
 @app.route("/google/login")
 def google_login():
-    logging.info("Redirect URI: %s", url_for("google_callback", _external=True))
     flow = get_login_flow(url_for("google_callback", _external=True))
     authorization_url, state = flow.authorization_url()
     session["state"] = state

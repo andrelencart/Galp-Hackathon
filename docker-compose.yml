@@ -1,0 +1,57 @@
+  
+services:
+  backend:
+    build:
+      context: ./Backend
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "5000:80"
+    networks:
+      - my_custom_network
+    depends_on:
+      - db
+    restart: unless-stopped
+    command: gunicorn -b 0.0.0.0:80 app:app
+  
+
+  frontend:
+    build:
+       context: ./frontend/nextjs-frontpage-demo
+    ports:
+      - "3000:3000"
+    networks:
+      - my_custom_network
+    restart: unless-stopped
+
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    networks:
+      - my_custom_network
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/hackaton_galp_db.sql:/docker-entrypoint-initdb.d/hackaton_galp_db.sql
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306" #dev only, retirar para profuto final para não expor a port da database
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 3
+    restart: unless-stopped
+    
+
+volumes:
+  mysql_data:
+ 
+networks:
+  my_custom_network:
+    driver: bridge

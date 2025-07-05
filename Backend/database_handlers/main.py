@@ -1,5 +1,5 @@
-from flask import Flask, request, render_template_string
-from user import register_user, add_run_entry
+from flask import Flask, request, render_template_string, jsonify
+from user import register_user, add_run_entry, signup_api
 from datetime import date
 
 app = Flask(__name__)
@@ -10,16 +10,33 @@ def main():
     if request.method == "POST":
         if "register" in request.form:
             message = register_user(request.form)
+        elif "signin" in request.form:
+            # simulate JSON-style data
+            data = {
+                "email": request.form.get("signin_email"),
+                "password": request.form.get("signin_password")
+            }
+            result, status = signup_api(data)
+            message = result.get("message") if status == 200 else result.get("error")
         elif "add_run" in request.form:
             message = add_run_entry(request.form)
+
     form_html = """
     <h2>Register</h2>
     <form method="post">
       Name: <input name="name" required><br>
       Email: <input name="email" required><br>
+      Password: <input type="password" name="password" required><br>
       Country: <input name="country"><br>
       District: <input name="district"><br>
       <button type="submit" name="register">Register</button>
+    </form>
+    <hr>
+    <h2>Sign In</h2>
+    <form method="post">
+      Email: <input name="signin_email" required><br>
+      Password: <input type="password" name="signin_password" required><br>
+      <button type="submit" name="signin">Sign In</button>
     </form>
     <hr>
     <h2>Add Run</h2>
@@ -39,6 +56,7 @@ def main():
     </form>
     <p style="color:green;">{message}</p>
     """.format(today=date.today(), message=message)
+
     return render_template_string(form_html, today=date.today(), message=message)
 
 if __name__ == "__main__":

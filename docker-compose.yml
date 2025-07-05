@@ -18,14 +18,14 @@ services:
     command: gunicorn -b 0.0.0.0:80 app:app
   
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - my_custom_network
-  #   restart: unless-stopped
+  frontend:
+    build:
+       context: ./frontend/nextjs-frontpage-demo
+    ports:
+      - "3000:3000"
+    networks:
+      - my_custom_network
+    restart: unless-stopped
 
 
   db:
@@ -41,7 +41,7 @@ services:
     expose:
       - "3306"
     ports:
-      - "3306:3306"
+      - "3306:3306" #dev only, retirar para profuto final para não expor a port da database
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

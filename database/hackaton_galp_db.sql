@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `Guest`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Guest` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,,
   `email` varchar(255) NOT NULL,
   `group_type` varchar(32) DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,

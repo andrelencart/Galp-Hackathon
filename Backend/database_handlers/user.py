@@ -3,6 +3,7 @@ from models import Profile, RunningLogs
 from db import SessionLocal
 from datetime import datetime
 from flask_bcrypt import Bcrypt
+from flask import request, jsonify
 
 bcrypt = Bcrypt()
 
@@ -50,22 +51,24 @@ def add_run_entry(form):
     finally:
         session.close()
 
-def signup_api(data):
+@app.route('/login', methods=['POST'])
+def login_api():
+    data = request.json
     email = data.get('email')
     password = data.get('password')
 
     if not email or not password:
-        return {"error": "Email and password are required."}, 400
+        return jsonify({"error": "Email and password are required."}), 400
 
     session = SessionLocal()
     try:
         user = session.query(Profile).filter_by(email=email).first()
         if not user:
-            return {"error": "User not found. Please register first."}, 404
+            return jsonify({"error": "User not found. Please register first."}), 404
 
         if not bcrypt.check_password_hash(user.password, password):
-            return {"error": "Incorrect password."}, 401
+            return jsonify({"error": "Incorrect password."}), 401
 
-        return {"message": "Password confirmed. You are signed in."}, 200
+        return jsonify({"message": "Password confirmed. You are signed in."}), 200
     finally:
         session.close()

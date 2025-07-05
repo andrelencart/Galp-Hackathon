@@ -67,17 +67,17 @@ def register():
 
 	return jsonify({"message": "User registered successfully"}), 201
 
-@app.route('/auth/login', methods=['POST'])
-def login():
-	data = request.json
-	username = data.get('username')
-	password = data.get('password')
+# @app.route('/auth/login', methods=['POST'])
+# def login():
+# 	data = request.json
+# 	username = data.get('username')
+# 	password = data.get('password')
 
-	for user in users:
-		if user['username'] == username and user['password'] == password:
-			return jsonify({"message": "Login successful"}), 200
+# 	for user in users:
+# 		if user['username'] == username and user['password'] == password:
+# 			return jsonify({"message": "Login successful"}), 200
 
-	return jsonify({"message": "Invalid credentials"}), 401
+# 	return jsonify({"message": "Invalid credentials"}), 401
 
 
 @app.route('/auth/google', methods=['POST'])

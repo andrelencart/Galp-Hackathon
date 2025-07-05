@@ -1,17 +1,13 @@
-
-from models import Profile, RunningLogs
-from db import SessionLocal
+from database_handlers.models import Profile, RunningLogs
+from database_handlers.db import SessionLocal
 from datetime import datetime
 from flask_bcrypt import Bcrypt
-from flask import sonify
-from countries import COUNTRIES_AND_DISTRICTS
+from flask import jsonify
+from database_handlers.countries import COUNTRIES_AND_DISTRICTS
 
 bcrypt = Bcrypt()
 
-
-@app.route('/auth/register', methods=['POST'])
-def register_api():
-    data = request.json
+def register_user(data):
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
@@ -21,23 +17,23 @@ def register_api():
 
     # Validate required fields
     if not all([name, email, password, district, council]):
-        return jsonify({"message": "All fields are required: name, email, password, district, council."}), 400
+        return {"message": "All fields are required: name, email, password, district, council."}, 400
 
     # Validate country, district and council
     if country not in COUNTRIES_AND_DISTRICTS or not COUNTRIES_AND_DISTRICTS[country]:
-        return jsonify({"message": f"Invalid or unsupported country: {country}"}), 400
+        return {"message": f"Invalid or unsupported country: {country}"}, 400
 
     if district not in COUNTRIES_AND_DISTRICTS[country]:
-        return jsonify({"message": f"Invalid district. Supported districts for {country}: {', '.join(COUNTRIES_AND_DISTRICTS[country].keys())}"}), 400
+        return {"message": f"Invalid district. Supported districts for {country}: {', '.join(COUNTRIES_AND_DISTRICTS[country].keys())}"}, 400
 
     if council not in COUNTRIES_AND_DISTRICTS[country][district]:
-        return jsonify({"message": f"Invalid council for district {district}. Supported councils: {', '.join(COUNTRIES_AND_DISTRICTS[country][district])}"}), 400
+        return {"message": f"Invalid council for district {district}. Supported councils: {', '.join(COUNTRIES_AND_DISTRICTS[country][district])}"}, 400
 
     session = SessionLocal()
     try:
         existing = session.query(Profile).filter_by(email=email).first()
         if existing:
-            return jsonify({"message": "Email already registered."}), 400
+            return {"message": "Email already registered."}, 400
 
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
         profile = Profile(
@@ -50,19 +46,19 @@ def register_api():
         )
         session.add(profile)
         session.commit()
-        return jsonify({"message": "Registration successful!"}), 201
+        return {"message": "Registration successful!"}, 201
     finally:
         session.close()
 
-def add_run_entry(form):
-    email = form["run_email"]
-    run_date = form["date"]
-    distance = form["distance_km"]
+def add_run_entry(data):
+    email = data.get("run_email")
+    run_date = data.get("date")
+    distance = data.get("distance_km")
     session = SessionLocal()
     try:
         profile = session.query(Profile).filter_by(email=email).first()
         if not profile:
-            return "Profile not found. Please register first."
+            return {"message": "Profile not found. Please register first."}, 404
 
         run_log = RunningLogs(
             profile_id=profile.id,
@@ -72,28 +68,26 @@ def add_run_entry(form):
         )
         session.add(run_log)
         session.commit()
-        return "Run added!"
+        return {"message": "Run added!"}, 201
     finally:
         session.close()
 
-@app.route('/login', methods=['POST'])
-def login_api():
-    data = request.json
+def signup_api(data):
     email = data.get('email')
     password = data.get('password')
 
     if not email or not password:
-        return jsonify({"error": "Email and password are required."}), 400
+        return {"error": "Email and password are required."}, 400
 
     session = SessionLocal()
     try:
         user = session.query(Profile).filter_by(email=email).first()
         if not user:
-            return jsonify({"error": "User not found. Please register first."}), 404
+            return {"error": "User not found. Please register first."}, 404
 
         if not bcrypt.check_password_hash(user.password, password):
-            return jsonify({"error": "Incorrect password."}), 401
+            return {"error": "Incorrect password."}, 401
 
-        return jsonify({"message": "Password confirmed. You are signed in."}), 200
+        return {"message": "Password confirmed. You are signed in."}, 200
     finally:
         session.close()

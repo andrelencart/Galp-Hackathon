@@ -21,7 +21,7 @@ COUNTRIES_AND_DISTRICTS = {
 		"Viseu": ["Viseu", "Lamego", "Mangualde", "Tondela", "Armamar", "Carregal do Sal", "Castro Daire", "Cinfães", "Moimenta da Beira", "Mortágua", "Nelas", "Oliveira de Frades", "Penalva do Castelo", "Penedono", "Resende", "Santa Comba Dão", "São João da Pesqueira", "Sátão", "Sernancelhe", "Tabuaço", "Tarouca", "Vouzela"],
 		"Madeira": ["Funchal", "Câmara de Lobos", "Santa Cruz", "Machico", "Calheta", "Ponta do Sol", "Porto Moniz", "Ribeira Brava", "Santana", "São Vicente", "Porto Santo"],
 		"Açores": ["Ponta Delgada", "Angra do Heroísmo", "Horta", "Ribeira Grande", "Lagoa", "Nordeste", "Povoação", "Vila Franca do Campo", "Santa Cruz da Graciosa", "Calheta (São Jorge)", "Velas", "Lajes das Flores", "Santa Cruz das Flores", "Corvo", "Madalena", "São Roque do Pico", "Lajes do Pico"]
-	}
+	},
 	"Moçambique": None,
 	"Brasil": None,
 	"Cabo Verde": None,

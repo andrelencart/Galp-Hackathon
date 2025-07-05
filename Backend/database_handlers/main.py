@@ -63,29 +63,24 @@
 #     app.run(debug=True, port=5000, host="0.0.0.0")
 
 from flask import Flask, request, jsonify
-from user import register_user, add_run_entry, signup_api
+from database_handlers.user import register_user, add_run_entry, signup_api
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
 
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
-    if not data or "email" not in data or "password" not in data:
-        return jsonify({"error": "Email and password are required."}), 400
     result, status = signup_api(data)
-    # signup_api should return a tuple (dict, int)
     return jsonify(result), status
 
-# Example: register endpoint (adapt as needed)
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
     result, status = register_user(data)
     return jsonify(result), status
 
-# Example: add run endpoint (adapt as needed)
 @app.route("/add_run", methods=["POST"])
 def add_run():
     data = request.json

@@ -8,14 +8,17 @@ services:
       DB_USER: root
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
+    # ports:
+    #   - "5000:80"
     ports:
-      - "5000:80"
+      - "5000:5000"
     networks:
       - my_custom_network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
-    command: gunicorn -b 0.0.0.0:80 app:app
+    command: gunicorn -b 0.0.0.0:5000 database_handlers.main:app
   
 
   frontend:
@@ -31,8 +34,11 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${DB_USER}
+
     networks:
       - my_custom_network
     volumes:

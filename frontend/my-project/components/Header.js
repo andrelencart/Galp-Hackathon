@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Box, Text, IconButton } from "@chakra-ui/react";
+import { Flex, Box, IconButton, Image } from "@chakra-ui/react";
 import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/menu";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
@@ -16,24 +16,27 @@ export default function Header() {
       justify="space-between"
       px={{ base: 4, md: 8 }}
       py={4}
-      bg="white"
+      bg="#EDE9DF"
       boxShadow="sm"
-      minH="60px"
+      height="80px"
     >
       <Box
         cursor="pointer"
         onClick={() => router.push("/")}
         display="flex"
         alignItems="center"
+        margin="0"
       >
-        <Text fontSize="lg" fontWeight="bold" color="brand.orange">
-          LOGO
-        </Text>
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          height="80px"
+          width="auto"
+          objectFit="contain"
+        />
       </Box>
       <Menu>
-        <MenuButton as={IconButton} icon={<ChevronDownIcon />} variant="outline" colorScheme="orange">
-          Sobre nós
-        </MenuButton>
+        <MenuButton text="Sobre nos" as={IconButton} icon={<ChevronDownIcon />} variant="outline" colorScheme="orange" aria-label="Sobre nós" />
         <MenuList>
           <MenuItem>Parceiros</MenuItem>
           <MenuItem>Missão</MenuItem>

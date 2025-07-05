@@ -20,7 +20,7 @@ services:
 
   frontend:
     build:
-       context: ./frontend/nextjs-frontpage-demo
+       context: ./frontend/my-project
     ports:
       - "3000:3000"
     networks:

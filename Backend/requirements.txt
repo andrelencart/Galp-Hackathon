@@ -24,6 +24,7 @@ flask-cors==3.0.10
 flask-jwt-extended==4.4.4
 marshmallow==3.20.1
 marshmallow-sqlalchemy==0.29.0
+sqlalchemy>=2.0,<3.0
 bcrypt==4.0.1
 pytest==7.4.0
 pytest-flask==1.2.0
@@ -32,3 +33,4 @@ flask-bcrypt==1.0.1
 flask-mysqldb==0.2.0
 mysqlclient==2.1.1
 pytesseract>=0.3.10,<0.4.0
+mysql-connector-python

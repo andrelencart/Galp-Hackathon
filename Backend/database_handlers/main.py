@@ -1,13 +1,6 @@
 from flask import Flask, request, render_template_string
 from user import register_user, add_run_entry
-# from handlers.proof import proof_bp
 from datetime import date
-# from dotenv import load_dotenv
-# from handlers.upload import upload_bp
-
-# app.register_blueprint(upload_bp)
-# load_dotenv()
-# app.register_blueprint(proof_bp)
 
 app = Flask(__name__)
 

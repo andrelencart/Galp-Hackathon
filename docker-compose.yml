@@ -41,7 +41,7 @@ services:
     expose:
       - "3306"
     ports:
-      - "3306:3306"
+      - "3306:3306" #dev only, retirar para profuto final para não expor a port da database
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

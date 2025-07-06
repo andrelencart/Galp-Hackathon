@@ -6,14 +6,13 @@ from flask import jsonify
 from database_handlers.countries import COUNTRIES_AND_DISTRICTS
 
 bcrypt = Bcrypt()
-
 def register_user(data):
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
-    country = data.get('country')
     district = data.get('district')
     council = data.get('council')
+    country = data.get('country') or "Portugal"  # Default to Portugal
 
     # Validate required fields
     if not all([name, email, password, district, council]):

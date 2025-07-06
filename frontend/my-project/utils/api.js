@@ -1,3 +1,6 @@
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export async function loginUser(email, password) {
   const res = await fetch("http://localhost:5000/login", {
     method: "POST",
@@ -17,21 +20,32 @@ export async function loginUser(email, password) {
 }
 
 
-export async function registerUser(name, email, password) {
-  const res = await fetch("http://localhost:5000/register", {  // Your backend register endpoint
+// export async function registerUser(name, email, password) {
+//   const res = await fetch("http://localhost:5000/register", {  // Your backend register endpoint
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({ name, email, password }),
+//   });
+
+//   const data = await res.json();
+
+//   if (!res.ok) {
+//     throw new Error(data.error || "Registration failed");
+//   }
+
+//   return data;
+// }
+
+export async function registerUser(name, email, password, country, district, council) {
+  const res = await fetch(`${apiUrl}/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, email, password }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, country, district, council }),
   });
-
   const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Registration failed");
-  }
-
+  if (!res.ok) throw new Error(data.message || "Registration failed");
   return data;
 }
 

@@ -19,6 +19,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
+import { useToast } from "@chakra-ui/react";
+import { registerUser } from "../utils/api"
 
 const countryList = [
   "Portugal",
@@ -31,6 +33,7 @@ const countryList = [
 
 export default function AuthBox({ type = "main" }) {
   const router = useRouter();
+  const toast = useToast();
 
   // COMMON FORM FIELDS
   const [isGalpWorker, setIsGalpWorker] = useState("no");
@@ -124,12 +127,42 @@ export default function AuthBox({ type = "main" }) {
 
   // --- REGISTER PAGE ---
   if (type === "register") {
-    function handleSubmit(e) {
-      e.preventDefault();
-      setSubmitted(true);
-      if (!passwordsMatch) return;
-      // Registration logic here
-    }
+   async function handleSubmit(e) {
+  e.preventDefault();
+  setSubmitted(true);
+  if (!passwordsMatch) return;
+  try {
+   await registerUser(
+      name,
+      email,
+      password,
+      isGalpWorker === "yes" ? country : "Portugal",
+      district,
+      council
+    );
+    // Show success toast
+    toast({
+      title: "Registo feito com sucesso!",
+      description: "Pode agora fazer login.",
+      status: "success",
+      duration: 4000,
+      isClosable: true,
+    });
+    // Optionally redirect to login after a short delay:
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
+  } catch (err) {
+    // Show error toast
+    toast({
+      title: "Erro no registo",
+      description: err.message,
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+    });
+  }
+}
 
     return (
       <Box

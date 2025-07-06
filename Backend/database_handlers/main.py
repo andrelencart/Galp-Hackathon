@@ -88,11 +88,16 @@ from img_to_text import image_to_text_bp
 from flask_cors import CORS
 from database_handlers.models import Profile, RunningLogs
 from database_handlers.db import SessionLocal
+from dotenv import load_dotenv
 import logging
+import os
+
+
+load_dotenv() 
 
 app = Flask(__name__)
 CORS(app)
-app.secret_key = "your_very_secret_key_here"
+app.secret_key = os.environ.get("SECRET_KEY", "dev") 
 logging.basicConfig(level=logging.INFO)
 
 app.config["IMAGE_SAVE_PATH"] = "/data/images"
@@ -148,9 +153,14 @@ def login():
 
 @app.route("/register", methods=["POST"])
 def register():
-    data = request.json
-    result, status = register_user(data)
-    return jsonify(result), status
+    if request.method == "POST":
+        data = request.get_json() or request.form
+        result, status = register_user(data)
+        return jsonify(result), status
+    else:
+        google_name = session.get("google_name")
+        google_email = session.get("google_email")
+        return render_template('register.html', name=google_name, email=google_email)
 
 @app.route("/add_run", methods=["POST"])
 def add_run():

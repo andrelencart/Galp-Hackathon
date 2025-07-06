@@ -175,6 +175,6 @@ def google_handle_callback():
         if not user:
             return redirect(f"http://localhost:3000/register?name={id_info.get('name')}&email={id_info.get('email')}&google_id={id_info.get('sub')}")
         else:
-            return redirect("http://localhost:3000/")
+            return redirect("http://localhost:3000/profile")
     finally:
         db_session.close()

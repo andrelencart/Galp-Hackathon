@@ -145,34 +145,11 @@ def login_route():
 def callback():
     return google_handle_callback()
 
-# @app.route("/google/callback")
-# def google_callback():
-#     db_session = SessionLocal()
-#     try:
-#         user_data = handle_google_callback(request, session, url_for("google_callback", _external=True))
-#         user = db_session.query(Profile).filter_by(email=user_data["email"]).first()
-#         if not user:
-#             user = Profile(
-#                 name=user_data["name"],
-#                 email=user_data["email"],
-#                 google_id=user_data["google_id"]
-#             )
-#             db_session.add(user)
-#             db_session.commit()
-#         session["google_id"] = user_data["google_id"]
-#         session["name"] = user_data["name"]
-#         session["email"] = user_data["email"]
-#         return redirect("http://localhost:3000/register")
-#     except Exception as e:
-#         flash("Google sign-in failed, please register with email.")
-#         return redirect(url_for("register"))
-#     finally:
-#         db_session.close()
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
     result, status = signup_api(data)
+    result["redirect_url"] = "http://localhost:3000/profile"
     return jsonify(result), status
 
 @app.route("/register", methods=["POST"])

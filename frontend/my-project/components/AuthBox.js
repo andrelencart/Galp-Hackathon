@@ -574,6 +574,46 @@ if (type === "submit") {
             />
           )}
         </HStack>
+             {/* Image upload input is always rendered, but the UI is only visible if showImageField is true */}
+      <FormControl>
+        <FormLabel>Anexe uma imagem como comprovativo</FormLabel>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '40px',
+            opacity: 0,
+            cursor: 'pointer',
+            display: showImageField ? 'block' : 'none',
+          }}
+          id="image-upload"
+          tabIndex={-1}
+        />
+        {showImageField && (
+          <Flex
+            as="label"
+            htmlFor="image-upload"
+            align="center"
+            justify="center"
+            borderWidth="1px"
+            borderRadius="md"
+            w="100%"
+            h="40px"
+            position="relative"
+            bg="white"
+            cursor="pointer"
+            tabIndex={0}
+            _hover={{ borderColor: "orange.400" }}
+          >
+            <Text color={imageFile ? "gray.800" : "gray.400"} fontSize="sm" w="100%" textAlign="center">
+              {imageFile ? imageFile.name : "Nenhum ficheiro selecionado"}
+            </Text>
+          </Flex>
+        )}
+      </FormControl>
         {/* Calendar booking style date range */}
         <FormControl>
           <FormLabel>Data da Corrida (início e fim)</FormLabel>
@@ -627,16 +667,11 @@ if (type === "submit") {
         <Button type="submit" colorScheme="orange" w="100%">
           Submeter
         </Button>
-        <Text textAlign="center">
-          Já tem conta?{" "}
-          <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
-            Entrar
-          </ChakraLink>
-        </Text>
       </VStack>
     </Box>
   );
 }
 
 return null;
+ }
 }

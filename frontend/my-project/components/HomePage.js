@@ -128,7 +128,7 @@ export default function HomePage() {
           py={8}
         >
           <Suspense fallback={<div>Loading...</div>}>
-           <AuthBox type="/" />
+           <AuthBox type="main" />
           </Suspense>
         </Box>
       </Flex>

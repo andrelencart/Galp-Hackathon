@@ -66,7 +66,7 @@ class RunningLogs(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     profile_id = Column(Integer, ForeignKey('Profile.id'), nullable=True)
     guest_id = Column(Integer, ForeignKey('Guest.id'), nullable=True)
-    date = Column(Date, nullable=False)
+    date = Column(Date, nullable=True)
     submitted_at = Column(DateTime, nullable=False)
     km = Column(DECIMAL(6, 3), nullable=True)
     people_count = Column(Integer, nullable=True)

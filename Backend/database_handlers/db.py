@@ -3,8 +3,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
+
+db = SQLAlchemy()
 
 user = os.getenv("DB_USER", "root")
 password = os.getenv("DB_PASS")

@@ -15,10 +15,109 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody,
+  PopoverArrow,
+  PopoverCloseButton,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
+
+// Helper to format yyyy-mm-dd to dd/mm/yyyy
+function formatDateDMY(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+// DateRangePicker using Chakra Popover and 2 date fields, closes only after both are selected or reset
+function DateRangeField({ value, onChange }) {
+  const [temp, setTemp] = useState({ start: value?.start || "", end: value?.end || "" });
+  const [isOpen, setIsOpen] = useState(false);
+  const startRef = useRef(null);
+
+  // Open popover and focus start input
+  const handleOpen = () => {
+    setTemp({ start: value?.start || "", end: value?.end || "" });
+    setIsOpen(true);
+    setTimeout(() => {
+      if (startRef.current) startRef.current.focus();
+    }, 50);
+  };
+
+  // When either start or end changes
+  const handleChange = (e) => {
+    const { name, value: val } = e.target;
+    setTemp((prev) => {
+      const updated = { ...prev, [name]: val };
+      // If both dates are picked and end >= start, commit and close
+      if (updated.start && updated.end && updated.end >= updated.start) {
+        onChange(updated);
+        setIsOpen(false);
+      }
+      return updated;
+    });
+  };
+
+  const handleClear = () => {
+    setTemp({ start: "", end: "" });
+    onChange({ start: "", end: "" });
+    setIsOpen(false);
+  };
+
+  // Value shown in field
+  const displayValue =
+    value?.start && value?.end
+      ? `${formatDateDMY(value.start)} até ${formatDateDMY(value.end)}`
+      : value?.start
+        ? `${formatDateDMY(value.start)} até ...`
+        : "";
+
+  return (
+    <Popover isOpen={isOpen} onClose={() => setIsOpen(false)} closeOnBlur>
+      <PopoverTrigger>
+        <Input
+          readOnly
+          placeholder="Selecionar data início e fim"
+          value={displayValue}
+          onClick={handleOpen}
+          cursor="pointer"
+          bg="white"
+        />
+      </PopoverTrigger>
+      <PopoverContent w="250px">
+        <PopoverArrow />
+        <PopoverCloseButton onClick={handleClear} />
+        <PopoverBody>
+          <VStack spacing={3} align="stretch">
+            <FormLabel fontSize="sm" mb={0}>Data de início</FormLabel>
+            <Input
+              type="date"
+              name="start"
+              ref={startRef}
+              value={temp.start}
+              max={temp.end || undefined}
+              onChange={handleChange}
+              autoFocus
+            />
+            <FormLabel fontSize="sm" mb={0}>Data de fim</FormLabel>
+            <Input
+              type="date"
+              name="end"
+              value={temp.end}
+              min={temp.start || undefined}
+              onChange={handleChange}
+            />
+            <Button onClick={handleClear} size="sm" mt={2} colorScheme="gray">Limpar</Button>
+          </VStack>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 const countryList = [
   "Portugal",
@@ -45,11 +144,9 @@ export default function AuthBox({ type = "main" }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // SUBMIT ONLY (Kms field)
+  // SUBMIT ONLY (Kms field & date range state)
   const [kms, setKms] = useState("");
-  // Calendar fields
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
 
   const districtOptions = districts;
   const councilOptions = district ? councilsByDistrict[district] || [] : [];
@@ -281,24 +378,10 @@ export default function AuthBox({ type = "main" }) {
               inputMode="decimal"
             />
           </FormControl>
-          {/* Calendar booking style date range */}
+          {/* Single booking-style date range field */}
           <FormControl>
-            <FormLabel>Data de Início</FormLabel>
-            <Input
-              type="date"
-              value={startDate}
-              max={endDate || undefined}
-              onChange={e => setStartDate(e.target.value)}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Data de Fim</FormLabel>
-            <Input
-              type="date"
-              value={endDate}
-              min={startDate || undefined}
-              onChange={e => setEndDate(e.target.value)}
-            />
+            <FormLabel>Data da Corrida (início e fim)</FormLabel>
+            <DateRangeField value={dateRange} onChange={setDateRange} />
           </FormControl>
           {isGalpWorker === "yes" && (
             <FormControl>
@@ -354,22 +437,4 @@ export default function AuthBox({ type = "main" }) {
   }
 
   return null;
-}
-
-export async function submitData(title, description) {
-  const res = await fetch("http://localhost:5000/submit", {  // Replace with your backend submit endpoint
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ title, description }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Submission failed");
-  }
-
-  return data;
 }

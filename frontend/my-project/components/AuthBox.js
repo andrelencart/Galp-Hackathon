@@ -22,6 +22,7 @@ import {
   PopoverArrow,
   PopoverCloseButton,
   HStack,
+  Flex,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
@@ -36,9 +37,20 @@ function formatDateDMY(dateStr) {
   return `${d}/${m}/${y}`;
 }
 
+// Helper to format dd/mm/yyyy to yyyy-mm-dd
+function formatDateYMD(dateStr) {
+  if (!dateStr) return "";
+  const [d, m, y] = dateStr.split("/");
+  return `${y}-${m}-${d}`;
+}
+
 // DateRangePicker using Chakra Popover and 2 date fields, closes only after both are selected or reset
 function DateRangeField({ value, onChange }) {
-  const [temp, setTemp] = useState({ start: value?.start || "", end: value?.end || "" });
+  // value is {start, end} in dd/mm/yyyy
+  const [temp, setTemp] = useState({
+    start: value?.start || "",
+    end: value?.end || ""
+  });
   const [isOpen, setIsOpen] = useState(false);
   const startRef = useRef(null);
 
@@ -54,10 +66,19 @@ function DateRangeField({ value, onChange }) {
   // When either start or end changes
   const handleChange = (e) => {
     const { name, value: val } = e.target;
+    // Always convert to dd/mm/yyyy
+    let formatted = "";
+    if (val && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      formatted = formatDateDMY(val);
+    }
     setTemp((prev) => {
-      const updated = { ...prev, [name]: val };
+      const updated = { ...prev, [name]: formatted };
       // If both dates are picked and end >= start, commit and close
-      if (updated.start && updated.end && updated.end >= updated.start) {
+      if (
+        updated.start &&
+        updated.end &&
+        formatDateYMD(updated.end) >= formatDateYMD(updated.start)
+      ) {
         onChange(updated);
         setIsOpen(false);
       }
@@ -71,12 +92,12 @@ function DateRangeField({ value, onChange }) {
     setIsOpen(false);
   };
 
-  // Value shown in field
+  // Value shown in field - always dd/mm/yyyy
   const displayValue =
     value?.start && value?.end
-      ? `${formatDateDMY(value.start)} até ${formatDateDMY(value.end)}`
+      ? `${value.start} até ${value.end}`
       : value?.start
-        ? `${formatDateDMY(value.start)} até ...`
+        ? `${value.start} até ...`
         : "";
 
   return (
@@ -101,8 +122,8 @@ function DateRangeField({ value, onChange }) {
               type="date"
               name="start"
               ref={startRef}
-              value={temp.start}
-              max={temp.end || undefined}
+              value={temp.start ? formatDateYMD(temp.start) : ""}
+              max={temp.end ? formatDateYMD(temp.end) : undefined}
               onChange={handleChange}
               autoFocus
             />
@@ -110,8 +131,8 @@ function DateRangeField({ value, onChange }) {
             <Input
               type="date"
               name="end"
-              value={temp.end}
-              min={temp.start || undefined}
+              value={temp.end ? formatDateYMD(temp.end) : ""}
+              min={temp.start ? formatDateYMD(temp.start) : undefined}
               onChange={handleChange}
             />
             <Button onClick={handleClear} size="sm" mt={2} colorScheme="gray">Limpar</Button>
@@ -152,10 +173,13 @@ export default function AuthBox({ type = "main" }) {
   const [kms, setKms] = useState("");
   const [steps, setSteps] = useState("");
   const [distanceType, setDistanceType] = useState("kms");
-  // Calendar fields
+  // Calendar fields in dd/mm/yyyy
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const dateRange = { start: startDate, end: endDate };
+
+  // Image upload for distance over threshold
+  const [imageFile, setImageFile] = useState(null);
 
   const districtOptions = districts;
   const councilOptions = district ? councilsByDistrict[district] || [] : [];
@@ -175,13 +199,25 @@ export default function AuthBox({ type = "main" }) {
   }
 
   function handleKmsChange(e) {
-    // Only allow numbers and at most one decimal point
     let value = e.target.value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
       value = parts[0] + '.' + parts.slice(1).join('');
     }
     setKms(value);
+  }
+
+  // Check if image field should appear
+  const kmsValue = parseFloat(kms);
+  const stepsValueInt = parseInt(steps, 10);
+  const showImageField =
+    (distanceType === "kms" && !isNaN(kmsValue) && kmsValue >= 10) ||
+    (distanceType === "steps" && !isNaN(stepsValueInt) && stepsValueInt >= 14000);
+
+  // File input is always present, but the UI is only visible if showImageField is true
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    setImageFile(file || null);
   }
 
   // --- MAIN PAGE ---
@@ -265,7 +301,6 @@ export default function AuthBox({ type = "main" }) {
           district,
           council
         );
-        // Show success toast
         toast({
           title: "Registo feito com sucesso!",
           description: "Pode agora fazer login.",
@@ -273,12 +308,10 @@ export default function AuthBox({ type = "main" }) {
           duration: 4000,
           isClosable: true,
         });
-        // Optionally redirect to login after a short delay:
         setTimeout(() => {
           router.push("/login");
         }, 2000);
       } catch (err) {
-        // Show error toast
         toast({
           title: "Erro no registo",
           description: err.message,
@@ -395,6 +428,11 @@ export default function AuthBox({ type = "main" }) {
   if (type === "submit") {
     const handleSubmit = async (e) => {
       e.preventDefault();
+
+      // Convert dd/mm/yyyy to yyyy-mm-dd for backend
+      const backendStart = startDate ? formatDateYMD(startDate) : '';
+      const backendEnd = endDate ? formatDateYMD(endDate) : '';
+
       const distance_km = distanceType === "kms" ? kms : null;
       const stepsValue = distanceType === "steps" ? steps : null;
 
@@ -408,10 +446,12 @@ export default function AuthBox({ type = "main" }) {
         return;
       }
 
+      // Note: imageFile handling would be needed here for backend integration
+
       try {
         await submitRun(
           email,
-          startDate,
+          backendStart,
           distance_km,
           stepsValue
         );
@@ -421,7 +461,7 @@ export default function AuthBox({ type = "main" }) {
           duration: 3000,
           isClosable: true,
         });
-        // Optionally reset fields or redirect here
+        setImageFile(null); // Optional: reset image after submit
       } catch (err) {
         toast({
           title: "Erro ao submeter corrida",
@@ -505,6 +545,46 @@ export default function AuthBox({ type = "main" }) {
               />
             )}
           </HStack>
+          {/* Image upload input is always rendered, but the UI is only visible if showImageField is true */}
+          <FormControl>
+            <FormLabel>Anexe uma imagem como comprovativo</FormLabel>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '40px',
+                opacity: 0,
+                cursor: 'pointer',
+                display: showImageField ? 'block' : 'none',
+              }}
+              id="image-upload"
+              tabIndex={-1}
+            />
+            {showImageField && (
+              <Flex
+                as="label"
+                htmlFor="image-upload"
+                align="center"
+                justify="center"
+                borderWidth="1px"
+                borderRadius="md"
+                w="100%"
+                h="40px"
+                position="relative"
+                bg="white"
+                cursor="pointer"
+                tabIndex={0}
+                _hover={{ borderColor: "orange.400" }}
+              >
+                <Text color={imageFile ? "gray.800" : "gray.400"} fontSize="sm" w="100%" textAlign="center">
+                  {imageFile ? imageFile.name : "Nenhum ficheiro selecionado"}
+                </Text>
+              </Flex>
+            )}
+          </FormControl>
           {/* Calendar booking style date range */}
           <FormControl>
             <FormLabel>Data da Corrida (início e fim)</FormLabel>
@@ -558,12 +638,6 @@ export default function AuthBox({ type = "main" }) {
           <Button type="submit" colorScheme="orange" w="100%">
             Submeter
           </Button>
-          <Text textAlign="center">
-            Já tem conta?{" "}
-            <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
-              Entrar
-            </ChakraLink>
-          </Text>
         </VStack>
       </Box>
     );

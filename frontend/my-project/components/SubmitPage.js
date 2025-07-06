@@ -1,11 +1,35 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import { Box, Flex, VStack, Text, OrderedList, ListItem } from "@chakra-ui/react";
 import Header from "./Header";
 import AuthBox from "./AuthBox";
 import Image from "next/image";
 
+const images = [
+  "/placeholder.png",
+  "/placeholder2.png",
+  "/placeholder3.png"
+];
+
+function getRandomIndex(exclude) {
+  let idx = Math.floor(Math.random() * images.length);
+  while (images.length > 1 && idx === exclude) {
+    idx = Math.floor(Math.random() * images.length);
+  }
+  return idx;
+}
+
 export default function SubmitPage() {
+  const [imgIdx, setImgIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImgIdx(prev => getRandomIndex(prev));
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Flex direction="column" minH="100vh" h="100vh" overflow="hidden">
       <Header />
@@ -22,7 +46,7 @@ export default function SubmitPage() {
         >
           {/* Background image */}
           <Image
-            src="/placeholder.png"
+            src={images[imgIdx]}
             alt="Placeholder"
             style={{
               position: "absolute",

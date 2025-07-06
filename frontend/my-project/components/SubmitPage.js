@@ -101,7 +101,7 @@ export default function SubmitPage() {
           py={8}
         >
           <Suspense fallback={<div>Loading...</div>}>
-            <AuthBox type="register" />
+            <AuthBox type="submit" />
           </Suspense>
         </Box>
       </Flex>

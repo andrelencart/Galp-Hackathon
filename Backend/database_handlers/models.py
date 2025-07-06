@@ -47,6 +47,19 @@ class Profile(Base):
     # Relationship to Running_logs
     running_logs = relationship("RunningLogs", back_populates="profile")
 
+class ProfileGoogle(Base):
+    __tablename__ = 'Profile_google'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False, unique=True)
+    group_type = Column(String(32), nullable=True)
+    district = Column(String(255), nullable=True)
+    council = Column(String(255), nullable=True)
+    activity = Column(String(255), nullable=True)
+    country = Column(String(255), nullable=True)
+    google_id = Column(String(255), nullable=True, unique=True)
+
 class RunningLogs(Base):
     __tablename__ = 'Running_logs'
 

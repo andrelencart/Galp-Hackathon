@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
 import { useToast } from "@chakra-ui/react";
-import { registerUser } from "../utils/api"
+import { registerUser, loginUser, submitRun } from "../utils/api"
 
 const countryList = [
   "Portugal",
@@ -50,6 +50,8 @@ export default function AuthBox({ type = "main" }) {
 
   // SUBMIT ONLY (Kms field)
   const [kms, setKms] = useState("");
+  const [steps, setSteps] = useState("");
+  const [distanceType, setDistanceType] = useState("kms");
   // Calendar fields
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -101,17 +103,39 @@ export default function AuthBox({ type = "main" }) {
   }
 
   // --- LOGIN PAGE ---
-  if (type === "login") {
+  const handleLogin = async (e) => {
+	  e.preventDefault();
+    try {
+      const data = await loginUser(email, password);
+      toast({
+        title: "Login bem-sucedido!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      router.push("/"); // or wherever you want to redirect
+    } catch (err) {
+		toast({
+        title: "Erro no login",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+	});
+}
+};
+
+if (type === "login") {
     return (
-      <Box as="form" w="100%" maxW="sm" mx="auto" p={8} borderWidth={1} borderRadius="lg" boxShadow="0 4px 12px 0 #ED893655">
+      <Box as="form" onSubmit={handleLogin} w="100%" maxW="sm" mx="auto" p={8} borderWidth={1} borderRadius="lg" boxShadow="0 4px 12px 0 #ED893655">
         <VStack spacing={4}>
           <Heading size="md">Entrar</Heading>
           <Input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
           <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          <Button colorScheme="orange" w="100%">
+          <Button colorScheme="orange" w="100%" type="submit">
             Login
           </Button>
-          <Button colorScheme="orange" w="100%">
+          <Button colorScheme="orange" w="100%" onClick={() => window.location.href = "http://localhost:5000/google/login"}>
             Utilizar conta Google
           </Button>
           <Text>
@@ -268,10 +292,46 @@ export default function AuthBox({ type = "main" }) {
 
   // --- SUBMIT PAGE ---
   if (type === "submit") {
-    function handleSubmit(e) {
-      e.preventDefault();
-      // Submission logic here
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    const distance_km = distanceType === "kms" ? kms : null;
+    const stepsValue = distanceType === "steps" ? steps : null;
+  
+    if (!distance_km && !stepsValue) {
+      toast({
+        title: "Preencha Kms ou Passos",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
     }
+  
+    try {
+      await submitRun(
+        email,
+        startDate,
+        distance_km,
+        stepsValue
+      );
+      toast({
+        title: "Corrida submetida!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      // Optionally reset fields or redirect here
+    } catch (err) {
+      toast({
+        title: "Erro ao submeter corrida",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
 
     return (
       <Box
@@ -297,6 +357,14 @@ export default function AuthBox({ type = "main" }) {
                 <Radio value="no" colorScheme="orange">Não</Radio>
               </Stack>
             </RadioGroup>
+          <FormControl>
+            <FormLabel>Nome</FormLabel>
+            <Input
+              placeholder="Nome"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+          </FormControl>
           </FormControl>
           <Input
             placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
@@ -306,14 +374,39 @@ export default function AuthBox({ type = "main" }) {
           />
           {/* Kms field, only allow numbers and decimals */}
           <FormControl>
-            <FormLabel>Kms Percorridos</FormLabel>
-            <Input
-              placeholder="Introduza os kms percorridos"
-              value={kms}
-              onChange={handleKmsChange}
-              inputMode="decimal"
-            />
+            <FormLabel>Tipo de registo</FormLabel>
+            <RadioGroup value={distanceType} onChange={setDistanceType}>
+              <Stack direction="row">
+                <Radio value="kms" colorScheme="orange">Kms</Radio>
+                <Radio value="steps" colorScheme="orange">Passos</Radio>
+              </Stack>
+            </RadioGroup>
           </FormControl>
+          
+          {distanceType === "kms" && (
+            <FormControl>
+              <FormLabel>Kms Percorridos</FormLabel>
+              <Input
+                placeholder="Introduza os kms percorridos"
+                value={kms}
+                onChange={e => setKms(e.target.value.replace(/[^0-9.]/g, ""))}
+                inputMode="decimal"
+              />
+            </FormControl>
+          )}
+          
+          {distanceType === "steps" && (
+            <FormControl>
+              <FormLabel>Passos Percorridos</FormLabel>
+              <Input
+                placeholder="Introduza o número de passos"
+                value={steps}
+                onChange={e => setSteps(e.target.value.replace(/\D/, ""))}
+                inputMode="numeric"
+              />
+            </FormControl>
+          )}
+
           {/* Calendar booking style date range */}
           <FormControl>
             <FormLabel>Data de Início</FormLabel>
@@ -389,20 +482,3 @@ export default function AuthBox({ type = "main" }) {
   return null;
 }
 
-export async function submitData(title, description) {
-  const res = await fetch("http://localhost:5000/submit", {  // Replace with your backend submit endpoint
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ title, description }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || "Submission failed");
-  }
-
-  return data;
-}

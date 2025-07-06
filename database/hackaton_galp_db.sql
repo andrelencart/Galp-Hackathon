@@ -77,6 +77,24 @@ LOCK TABLES `Profile` WRITE;
 /*!40000 ALTER TABLE `Profile` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `Profile_google`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Profile_google` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `group_type` varchar(32) DEFAULT NULL,
+  `district` varchar(255) DEFAULT NULL,
+  `council` varchar(255) DEFAULT NULL,
+  `activity` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `google_id` (`google_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 --
 -- Table structure for table `Running_logs`
 --

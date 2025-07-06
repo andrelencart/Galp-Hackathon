@@ -83,7 +83,7 @@
 
 from flask import Flask, request, jsonify, session, redirect, url_for, flash, render_template, send_from_directory
 from database_handlers.user import register_user, add_run_entry, signup_api
-from google_auth import get_login_flow, handle_google_callback
+from google_auth import log_check, google_login, google_handle_callback
 from img_to_text import image_to_text_bp
 from flask_cors import CORS
 from database_handlers.models import Profile, RunningLogs
@@ -113,37 +113,60 @@ app.register_blueprint(image_to_text_bp)
 def get_image(filename):
     return send_from_directory(app.config["IMAGE_SAVE_PATH"], filename)
 
+# @app.route("/google/login")
+# def google_login():
+#     flow = get_login_flow(url_for("google_callback", _external=True))
+#     authorization_url, state = flow.authorization_url()
+#     session["state"] = state
+#     return redirect(authorization_url)
+
+@app.route("/protected_area")
+def protected_area():
+    return f"""
+    <h1>Welcome!</h1>
+    <p>Email:</p>
+    <a href='/logout'><button>Logout</button></a>
+    """
+
+@app.route("/")
+def home():
+    return '''
+        <button onclick="location.href='/auth/login'">Login</button>
+        <button onclick="location.href='/auth/signup'">Sign Up</button>
+        <button onclick="location.href='/google/login'">Login with Google</button>
+    '''
+
 @app.route("/google/login")
-def google_login():
-    flow = get_login_flow(url_for("google_callback", _external=True))
-    authorization_url, state = flow.authorization_url()
-    session["state"] = state
-    return redirect(authorization_url)
+def login_route():
+    return google_login()
 
 @app.route("/google/callback")
-def google_callback():
-    db_session = SessionLocal()
-    try:
-        user_data = handle_google_callback(request, session, url_for("google_callback", _external=True))
-        # Check if user exists in DB
-        user = db_session.query(Profile).filter_by(email=user_data["email"]).first()
-        if not user:
-            user = Profile(
-                name=user_data["name"],
-                email=user_data["email"],
-                google_id=user_data["google_id"]
-            )
-            db_session.add(user)
-            db_session.commit()
-        session["google_id"] = user_data["google_id"]
-        session["name"] = user_data["name"]
-        session["email"] = user_data["email"]
-        return redirect("/protected_area")
-    except Exception as e:
-        flash("Google sign-in failed, please register with email.")
-        return redirect(url_for("register"))
-    finally:
-        db_session.close()
+def callback():
+    return google_handle_callback()
+
+# @app.route("/google/callback")
+# def google_callback():
+#     db_session = SessionLocal()
+#     try:
+#         user_data = handle_google_callback(request, session, url_for("google_callback", _external=True))
+#         user = db_session.query(Profile).filter_by(email=user_data["email"]).first()
+#         if not user:
+#             user = Profile(
+#                 name=user_data["name"],
+#                 email=user_data["email"],
+#                 google_id=user_data["google_id"]
+#             )
+#             db_session.add(user)
+#             db_session.commit()
+#         session["google_id"] = user_data["google_id"]
+#         session["name"] = user_data["name"]
+#         session["email"] = user_data["email"]
+#         return redirect("http://localhost:3000/register")
+#     except Exception as e:
+#         flash("Google sign-in failed, please register with email.")
+#         return redirect(url_for("register"))
+#     finally:
+#         db_session.close()
 
 @app.route("/login", methods=["POST"])
 def login():

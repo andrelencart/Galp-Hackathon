@@ -106,7 +106,7 @@ CREATE TABLE `Running_logs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `profile_id` int DEFAULT NULL,
   `guest_id` int DEFAULT NULL,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `submitted_at` datetime NOT NULL,
   `km` decimal(6,3) DEFAULT NULL,
   `people_count` int DEFAULT NULL,

@@ -87,7 +87,8 @@ from google_auth import log_check, google_login, google_handle_callback
 from img_to_text import image_to_text_bp
 from flask_cors import CORS
 from database_handlers.models import Profile, RunningLogs
-from database_handlers.db import SessionLocal
+# from database_handlers.db import SessionLocal
+from database_handlers.db import db
 from dotenv import load_dotenv
 import logging
 import os

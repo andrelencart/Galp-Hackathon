@@ -44,4 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+fit-km-milestones.png
+picture.jpg
+
 .env.local

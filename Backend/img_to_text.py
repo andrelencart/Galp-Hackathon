@@ -5,6 +5,9 @@ import re
 from flask import Blueprint, request, jsonify, current_app
 import pytesseract
 from PIL import Image
+from database_handlers.models import RunningLogs
+from database_handlers.db import db
+from datetime import datetime, date
 
 image_to_text_bp = Blueprint('image_to_text', __name__)
 
@@ -45,7 +48,8 @@ def image_to_text():
             distance_type = "steps"
             original_value = str(steps_matches[0])
         else:
-            return jsonify({'error': 'Neither km nor steps found'}), 400
+            print("OCR OUTPUT:", repr(text)) 
+            return jsonify({'error': 'Neither km nor steps found', 'ocr_text': text}), 400
 
         image_save_path = current_app.config.get("IMAGE_SAVE_PATH", "/data/images")
         os.makedirs(image_save_path, exist_ok=True)
@@ -59,7 +63,7 @@ def image_to_text():
         profile_id = request.form.get('profile_id', None)
         guest_id = request.form.get('guest_id', None)
         people_count = request.form.get('people_count', None)
-        valid = request.form.get('valid', 1)  # Default to valid
+        valid = 1   # Default to valid
 
         run_log = RunningLogs(
             profile_id=profile_id,

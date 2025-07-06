@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import Header from "./Header";
 import AuthBox from "./AuthBox";
+import { Suspense } from "react";
 
 export default function HomePage() {
   return (
@@ -126,7 +127,9 @@ export default function HomePage() {
           px={4}
           py={8}
         >
-          <AuthBox type="main" />
+          <Suspense fallback={<div>Loading...</div>}>
+           <AuthBox type="register" />
+          </Suspense>
         </Box>
       </Flex>
     </Flex>

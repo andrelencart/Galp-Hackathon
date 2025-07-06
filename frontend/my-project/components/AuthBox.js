@@ -28,6 +28,8 @@ import { useState, useRef } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
 import { useToast } from "@chakra-ui/react";
 import { registerUser, loginUser, submitRun } from "../utils/api";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 // Helper to format yyyy-mm-dd to dd/mm/yyyy
 function formatDateDMY(dateStr) {
@@ -156,6 +158,11 @@ export default function AuthBox({ type = "main" }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const dateRange = { start: startDate, end: endDate };
+  const searchParams = useSearchParams();
+  const google_id = searchParams.get("google_id");
+  const googleName = searchParams.get("name");
+  const googleEmail = searchParams.get("email");
+  const isGoogle = !!google_id;
 
   const districtOptions = districts;
   const councilOptions = district ? councilsByDistrict[district] || [] : [];
@@ -250,324 +257,343 @@ export default function AuthBox({ type = "main" }) {
     );
   }
 
-  // --- REGISTER PAGE ---
-  if (type === "register") {
-    async function handleSubmit(e) {
-      e.preventDefault();
-      setSubmitted(true);
-      if (!passwordsMatch) return;
-      try {
-        await registerUser(
-          name,
-          email,
-          password,
-          isGalpWorker === "yes" ? country : "Portugal",
-          district,
-          council
-        );
-        // Show success toast
-        toast({
-          title: "Registo feito com sucesso!",
-          description: "Pode agora fazer login.",
-          status: "success",
-          duration: 4000,
-          isClosable: true,
-        });
-        // Optionally redirect to login after a short delay:
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
-      } catch (err) {
-        // Show error toast
-        toast({
-          title: "Erro no registo",
-          description: err.message,
-          status: "error",
-          duration: 4000,
-          isClosable: true,
-        });
-      }
+useEffect(() => {
+  if (isGoogle) {
+    setName(googleName || "");
+    setEmail(googleEmail || "");
+    setPassword("");
+    setConfirmPassword("");
+  }
+  // eslint-disable-next-line
+}, [isGoogle, googleName, googleEmail]);
+
+if (type === "register") {
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setSubmitted(true);
+    if (!isGoogle && !passwordsMatch) return;
+    try {
+      await registerUser(
+        name,
+        email,
+        isGoogle ? undefined : password,
+        isGalpWorker === "yes" ? country : "Portugal",
+        district,
+        council,
+        google_id // Add this param to your registerUser utility!
+      );
+      // Show success toast
+      toast({
+        title: "Registo feito com sucesso!",
+        description: "Pode agora fazer login.",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "Erro no registo",
+        description: err.message,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
     }
+  }
 
-    return (
-      <Box
-        as="form"
-        onSubmit={handleSubmit}
-        w="100%"
-        maxW="sm"
-        mx="auto"
-        p={8}
-        borderWidth={1}
-        borderRadius="lg"
-        boxShadow="0 4px 12px 0 #ED893655"
-      >
-        <VStack spacing={4} align="stretch">
-          <Heading size="md" textAlign="center">
-            Criar Conta
-          </Heading>
+  return (
+    <Box as="form" onSubmit={handleSubmit} w="100%" maxW="sm" mx="auto" p={8} borderWidth={1} borderRadius="lg" boxShadow="0 4px 12px 0 #ED893655">
+      <VStack spacing={4} align="stretch">
+        <Heading size="md" textAlign="center">
+          Criar Conta
+        </Heading>
+        <FormControl>
+          <FormLabel>E trabalhador da Galp?</FormLabel>
+          <RadioGroup value={isGalpWorker} onChange={setIsGalpWorker}>
+            <Stack direction="row">
+              <Radio value="yes" colorScheme="orange">Sim</Radio>
+              <Radio value="no" colorScheme="orange">Não</Radio>
+            </Stack>
+          </RadioGroup>
+        </FormControl>
+        <Input
+          placeholder="Nome"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          disabled={isGoogle}
+        />
+        <Input
+          placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          disabled={isGoogle}
+        />
+        {/* Only show password fields if NOT Google */}
+        {!isGoogle && (
+          <>
+            <FormControl isRequired>
+              <Input
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </FormControl>
+            <FormControl isRequired isInvalid={submitted && !passwordsMatch}>
+              <Input
+                placeholder="Confirm password"
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+              />
+              <FormErrorMessage>Passwords nao sao iguais</FormErrorMessage>
+            </FormControl>
+          </>
+        )}
+        {isGalpWorker === "yes" && (
           <FormControl>
-            <FormLabel>E trabalhador da Galp?</FormLabel>
-            <RadioGroup value={isGalpWorker} onChange={setIsGalpWorker}>
-              <Stack direction="row">
-                <Radio value="yes" colorScheme="orange">Sim</Radio>
-                <Radio value="no" colorScheme="orange">Não</Radio>
-              </Stack>
-            </RadioGroup>
+            <FormLabel>País</FormLabel>
+            <Select value={country} onChange={handleCountryChange}>
+              {countryList.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </Select>
           </FormControl>
-          <Input placeholder="Nome" value={name} onChange={e => setName(e.target.value)} />
-          <Input
-            placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-          <FormControl isRequired>
-            <Input
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-          </FormControl>
-          <FormControl isRequired isInvalid={submitted && !passwordsMatch}>
-            <Input
-              placeholder="Confirm password"
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-            />
-            <FormErrorMessage>Passwords nao sao iguais</FormErrorMessage>
-          </FormControl>
-          {isGalpWorker === "yes" && (
+        )}
+        {showDistrictCouncil && (
+          <>
             <FormControl>
-              <FormLabel>País</FormLabel>
-              <Select value={country} onChange={handleCountryChange}>
-                {countryList.map(c => (
+              <FormLabel>Distrito</FormLabel>
+              <Select
+                placeholder="Selecione o distrito"
+                value={district}
+                onChange={handleDistrictChange}
+              >
+                {districtOptions.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Concelho</FormLabel>
+              <Select
+                placeholder="Selecione o concelho"
+                value={council}
+                onChange={e => setCouncil(e.target.value)}
+                isDisabled={!district}
+              >
+                {councilOptions.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </Select>
             </FormControl>
-          )}
-          {showDistrictCouncil && (
-            <>
-              <FormControl>
-                <FormLabel>Distrito</FormLabel>
-                <Select
-                  placeholder="Selecione o distrito"
-                  value={district}
-                  onChange={handleDistrictChange}
-                >
-                  {districtOptions.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <FormLabel>Concelho</FormLabel>
-                <Select
-                  placeholder="Selecione o concelho"
-                  value={council}
-                  onChange={e => setCouncil(e.target.value)}
-                  isDisabled={!district}
-                >
-                  {councilOptions.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
-          <Button type="submit" colorScheme="orange" w="100%" isDisabled={!passwordsMatch}>
-            Registar
-          </Button>
-          <Text textAlign="center">
-            Já tem conta?{" "}
-            <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
-              Entrar
-            </ChakraLink>
-          </Text>
-        </VStack>
-      </Box>
-    );
+          </>
+        )}
+        <Button
+          type="submit"
+          colorScheme="orange"
+          w="100%"
+          isDisabled={!passwordsMatch && !isGoogle}
+        >
+          Registar
+        </Button>
+        <Text textAlign="center">
+          Já tem conta?{" "}
+          <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
+            Entrar
+          </ChakraLink>
+        </Text>
+      </VStack>
+    </Box>
+  );
+}
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const distance_km = distanceType === "kms" ? kms : null;
+  const stepsValue = distanceType === "steps" ? steps : null;
+
+  if (!distance_km && !stepsValue) {
+    toast({
+      title: "Preencha Kms ou Passos",
+      status: "warning",
+      duration: 2000,
+      isClosable: true,
+    });
+    return;
   }
 
-  // --- SUBMIT PAGE ---
-  if (type === "submit") {
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const distance_km = distanceType === "kms" ? kms : null;
-      const stepsValue = distanceType === "steps" ? steps : null;
+  try {
+    await submitRun({
+      run_email: email,
+      name,
+      country,
+      district,
+      council,
+    //   group_type: groupType,
+    //   activity,
+      date: startDate,
+      distance_km,
+      steps: stepsValue
+    });
+    toast({
+      title: "Corrida submetida!",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+    // Optionally reset fields or redirect here
+  } catch (err) {
+    toast({
+      title: "Erro ao submeter corrida",
+      description: err.message,
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+};
 
-      if (!distance_km && !stepsValue) {
-        toast({
-          title: "Preencha Kms ou Passos",
-          status: "warning",
-          duration: 2000,
-          isClosable: true,
-        });
-        return;
-      }
-
-      try {
-        await submitRun(
-          email,
-          startDate,
-          distance_km,
-          stepsValue
-        );
-        toast({
-          title: "Corrida submetida!",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        // Optionally reset fields or redirect here
-      } catch (err) {
-        toast({
-          title: "Erro ao submeter corrida",
-          description: err.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    };
-
-    return (
-      <Box
-        as="form"
-        onSubmit={handleSubmit}
-        w="100%"
-        maxW="sm"
-        mx="auto"
-        p={8}
-        borderWidth={1}
-        borderRadius="lg"
-        boxShadow="0 4px 12px 0 #ED893655"
-      >
-        <VStack spacing={4} align="stretch">
-          <Heading size="md" textAlign="center">
-            Submeter Corrida
-          </Heading>
-          <FormControl>
-            <FormLabel>E trabalhador da Galp?</FormLabel>
-            <RadioGroup value={isGalpWorker} onChange={setIsGalpWorker}>
-              <Stack direction="row">
-                <Radio value="yes" colorScheme="orange">Sim</Radio>
-                <Radio value="no" colorScheme="orange">Não</Radio>
-              </Stack>
-            </RadioGroup>
-          </FormControl>
-          {/* Nome field without label */}
-          <Input
-            placeholder="Nome"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <Input
-            placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-          {/* Kms/Passos fields and selector, compact and well-aligned and vertically centered */}
-          <HStack spacing={0} align="center" w="100%">
-            <RadioGroup value={distanceType} onChange={setDistanceType}>
-              <Stack direction="row" spacing={2} align="center">
-                <Radio value="kms" colorScheme="orange">Kms</Radio>
-                <Radio value="steps" colorScheme="orange">Passos</Radio>
-              </Stack>
-            </RadioGroup>
-            {distanceType === "kms" && (
-              <Input
-                ml={3}
-                placeholder="Kms percorridos"
-                value={kms}
-                onChange={e => setKms(e.target.value.replace(/[^0-9.]/g, ""))}
-                inputMode="decimal"
-                maxW="260px"
-                w="100%"
-                alignSelf="center"
-                height="40px"
-              />
-            )}
-            {distanceType === "steps" && (
-              <Input
-                ml={3}
-                placeholder="Passos percorridos"
-                value={steps}
-                onChange={e => setSteps(e.target.value.replace(/\D/, ""))}
-                inputMode="numeric"
-                maxW="260px"
-                w="100%"
-                alignSelf="center"
-                height="40px"
-              />
-            )}
-          </HStack>
-          {/* Calendar booking style date range */}
-          <FormControl>
-            <FormLabel>Data da Corrida (início e fim)</FormLabel>
-            <DateRangeField
-              value={dateRange}
-              onChange={({ start, end }) => {
-                setStartDate(start);
-                setEndDate(end);
-              }}
+if (type === "submit") {
+  return (
+    <Box
+      as="form"
+      onSubmit={handleSubmit}
+      w="100%"
+      maxW="sm"
+      mx="auto"
+      p={8}
+      borderWidth={1}
+      borderRadius="lg"
+      boxShadow="0 4px 12px 0 #ED893655"
+    >
+      <VStack spacing={4} align="stretch">
+        <Heading size="md" textAlign="center">
+          Submeter Corrida
+        </Heading>
+        <FormControl>
+          <FormLabel>E trabalhador da Galp?</FormLabel>
+          <RadioGroup value={isGalpWorker} onChange={setIsGalpWorker}>
+            <Stack direction="row">
+              <Radio value="yes" colorScheme="orange">Sim</Radio>
+              <Radio value="no" colorScheme="orange">Não</Radio>
+            </Stack>
+          </RadioGroup>
+        </FormControl>
+        {/* Nome field without label */}
+        <Input
+          placeholder="Nome"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+        <Input
+          placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        {/* Kms/Passos fields and selector */}
+        <HStack spacing={0} align="center" w="100%">
+          <RadioGroup value={distanceType} onChange={setDistanceType}>
+            <Stack direction="row" spacing={2} align="center">
+              <Radio value="kms" colorScheme="orange">Kms</Radio>
+              <Radio value="steps" colorScheme="orange">Passos</Radio>
+            </Stack>
+          </RadioGroup>
+          {distanceType === "kms" && (
+            <Input
+              ml={3}
+              placeholder="Kms percorridos"
+              value={kms}
+              onChange={e => setKms(e.target.value.replace(/[^0-9.]/g, ""))}
+              inputMode="decimal"
+              maxW="260px"
+              w="100%"
+              alignSelf="center"
+              height="40px"
             />
+          )}
+          {distanceType === "steps" && (
+            <Input
+              ml={3}
+              placeholder="Passos percorridos"
+              value={steps}
+              onChange={e => setSteps(e.target.value.replace(/\D/, ""))}
+              inputMode="numeric"
+              maxW="260px"
+              w="100%"
+              alignSelf="center"
+              height="40px"
+            />
+          )}
+        </HStack>
+        {/* Calendar booking style date range */}
+        <FormControl>
+          <FormLabel>Data da Corrida (início e fim)</FormLabel>
+          <DateRangeField
+            value={dateRange}
+            onChange={({ start, end }) => {
+              setStartDate(start);
+              setEndDate(end);
+            }}
+          />
+        </FormControl>
+        {isGalpWorker === "yes" && (
+          <FormControl>
+            <FormLabel>País</FormLabel>
+            <Select value={country} onChange={handleCountryChange}>
+              {countryList.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </Select>
           </FormControl>
-          {isGalpWorker === "yes" && (
+        )}
+        {showDistrictCouncil && (
+          <>
             <FormControl>
-              <FormLabel>País</FormLabel>
-              <Select value={country} onChange={handleCountryChange}>
-                {countryList.map(c => (
+              <FormLabel>Distrito</FormLabel>
+              <Select
+                placeholder="Selecione o distrito"
+                value={district}
+                onChange={handleDistrictChange}
+              >
+                {districtOptions.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Concelho</FormLabel>
+              <Select
+                placeholder="Selecione o concelho"
+                value={council}
+                onChange={e => setCouncil(e.target.value)}
+                isDisabled={!district}
+              >
+                {councilOptions.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </Select>
             </FormControl>
-          )}
-          {showDistrictCouncil && (
-            <>
-              <FormControl>
-                <FormLabel>Distrito</FormLabel>
-                <Select
-                  placeholder="Selecione o distrito"
-                  value={district}
-                  onChange={handleDistrictChange}
-                >
-                  {districtOptions.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <FormLabel>Concelho</FormLabel>
-                <Select
-                  placeholder="Selecione o concelho"
-                  value={council}
-                  onChange={e => setCouncil(e.target.value)}
-                  isDisabled={!district}
-                >
-                  {councilOptions.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
-          <Button type="submit" colorScheme="orange" w="100%">
-            Submeter
-          </Button>
-          <Text textAlign="center">
-            Já tem conta?{" "}
-            <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
-              Entrar
-            </ChakraLink>
-          </Text>
-        </VStack>
-      </Box>
-    );
-  }
+          </>
+        )}
+        <Button type="submit" colorScheme="orange" w="100%">
+          Submeter
+        </Button>
+        <Text textAlign="center">
+          Já tem conta?{" "}
+          <ChakraLink color="brand.orange" onClick={() => router.push("/login")}>
+            Entrar
+          </ChakraLink>
+        </Text>
+      </VStack>
+    </Box>
+  );
+}
 
-  return null;
+return null;
 }

@@ -173,7 +173,7 @@ def google_handle_callback():
     try:
         user = db_session.query(ProfileGoogle).filter_by(email=email).first()
         if not user:
-            return redirect("http://localhost:3000/register")
+            return redirect(f"http://localhost:3000/register?name={id_info.get('name')}&email={id_info.get('email')}&google_id={id_info.get('sub')}")
         else:
             return redirect("http://localhost:3000/")
     finally:

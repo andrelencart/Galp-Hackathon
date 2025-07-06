@@ -3,6 +3,8 @@
 import { Box, Flex, Image, VStack, OrderedList, ListItem, Text } from "@chakra-ui/react";
 import Header from "./Header";
 import AuthBox from "./AuthBox";
+import { Suspense } from "react";
+
 
 export default function LoginPage() {
   return (
@@ -92,7 +94,9 @@ export default function LoginPage() {
           px={4}
           py={8}
         >
-          <AuthBox type="login" />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AuthBox type="register" />
+          </Suspense>
         </Box>
       </Flex>
     </Flex>

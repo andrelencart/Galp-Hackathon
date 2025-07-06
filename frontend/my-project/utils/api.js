@@ -19,24 +19,49 @@ export async function loginUser(email, password) {
   return data;
 }
 
-export async function registerUser(name, email, password, country, district, council) {
+export async function registerUser(name, email, password, country, district, council, google_id) {
+  // Build the payload dynamically
+  const payload = { name, email, country, district, council };
+  if (password !== undefined) payload.password = password;
+  if (google_id !== undefined) payload.google_id = google_id;
+
   const res = await fetch(`${apiUrl}/register`, {
-	method: "POST",
-	headers: { "Content-Type": "application/json" },
-	body: JSON.stringify({ name, email, password, country, district, council }),
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Registration failed");
   return data;
 }
 
-export async function submitRun(run_email, date, distance_km, steps) {
+export async function submitRun({
+  run_email,
+  name,
+  country,
+  district,
+  council,
+  group_type,
+  activity,
+  date,
+  distance_km,
+  steps
+}) {
   const res = await fetch(`${apiUrl}/add_run`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ run_email, date, distance_km, steps }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      run_email,
+      name,
+      country,
+      district,
+      council,
+      group_type,
+      activity,
+      date,
+      distance_km,
+      steps
+    }),
   });
 
   const data = await res.json();

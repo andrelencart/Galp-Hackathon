@@ -4,6 +4,7 @@ import { Box, Flex, VStack, Text, OrderedList, ListItem } from "@chakra-ui/react
 import Header from "./Header";
 import AuthBox from "./AuthBox";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export default function SubmitPage() {
   return (
@@ -99,7 +100,9 @@ export default function SubmitPage() {
           px={4}
           py={8}
         >
-          <AuthBox type="submit" />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AuthBox type="register" />
+          </Suspense>
         </Box>
       </Flex>
     </Flex>

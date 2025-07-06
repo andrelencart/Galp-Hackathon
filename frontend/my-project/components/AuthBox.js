@@ -25,6 +25,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
+import { useToast } from "@chakra-ui/react";
+import { registerUser, loginUser, submitRun } from "../utils/api"
 
 // Helper to format yyyy-mm-dd to dd/mm/yyyy
 function formatDateDMY(dateStr) {
@@ -130,6 +132,7 @@ const countryList = [
 
 export default function AuthBox({ type = "main" }) {
   const router = useRouter();
+  const toast = useToast();
 
   // COMMON FORM FIELDS
   const [isGalpWorker, setIsGalpWorker] = useState("no");
@@ -146,7 +149,11 @@ export default function AuthBox({ type = "main" }) {
 
   // SUBMIT ONLY (Kms field & date range state)
   const [kms, setKms] = useState("");
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [steps, setSteps] = useState("");
+  const [distanceType, setDistanceType] = useState("kms");
+  // Calendar fields
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const districtOptions = districts;
   const councilOptions = district ? councilsByDistrict[district] || [] : [];
@@ -195,17 +202,39 @@ export default function AuthBox({ type = "main" }) {
   }
 
   // --- LOGIN PAGE ---
-  if (type === "login") {
+  const handleLogin = async (e) => {
+	  e.preventDefault();
+    try {
+      const data = await loginUser(email, password);
+      toast({
+        title: "Login bem-sucedido!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      router.push("/"); // or wherever you want to redirect
+    } catch (err) {
+		toast({
+        title: "Erro no login",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+	});
+}
+};
+
+if (type === "login") {
     return (
-      <Box as="form" w="100%" maxW="sm" mx="auto" p={8} borderWidth={1} borderRadius="lg" boxShadow="0 4px 12px 0 #ED893655">
+      <Box as="form" onSubmit={handleLogin} w="100%" maxW="sm" mx="auto" p={8} borderWidth={1} borderRadius="lg" boxShadow="0 4px 12px 0 #ED893655">
         <VStack spacing={4}>
           <Heading size="md">Entrar</Heading>
           <Input placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
           <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          <Button colorScheme="orange" w="100%">
+          <Button colorScheme="orange" w="100%" type="submit">
             Login
           </Button>
-          <Button colorScheme="orange" w="100%">
+          <Button colorScheme="orange" w="100%" onClick={() => window.location.href = "http://localhost:5000/google/login"}>
             Utilizar conta Google
           </Button>
           <Text>
@@ -221,12 +250,42 @@ export default function AuthBox({ type = "main" }) {
 
   // --- REGISTER PAGE ---
   if (type === "register") {
-    function handleSubmit(e) {
-      e.preventDefault();
-      setSubmitted(true);
-      if (!passwordsMatch) return;
-      // Registration logic here
-    }
+   async function handleSubmit(e) {
+  e.preventDefault();
+  setSubmitted(true);
+  if (!passwordsMatch) return;
+  try {
+   await registerUser(
+      name,
+      email,
+      password,
+      isGalpWorker === "yes" ? country : "Portugal",
+      district,
+      council
+    );
+    // Show success toast
+    toast({
+      title: "Registo feito com sucesso!",
+      description: "Pode agora fazer login.",
+      status: "success",
+      duration: 4000,
+      isClosable: true,
+    });
+    // Optionally redirect to login after a short delay:
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
+  } catch (err) {
+    // Show error toast
+    toast({
+      title: "Erro no registo",
+      description: err.message,
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+    });
+  }
+}
 
     return (
       <Box
@@ -332,10 +391,46 @@ export default function AuthBox({ type = "main" }) {
 
   // --- SUBMIT PAGE ---
   if (type === "submit") {
-    function handleSubmit(e) {
-      e.preventDefault();
-      // Submission logic here
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    const distance_km = distanceType === "kms" ? kms : null;
+    const stepsValue = distanceType === "steps" ? steps : null;
+  
+    if (!distance_km && !stepsValue) {
+      toast({
+        title: "Preencha Kms ou Passos",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
     }
+  
+    try {
+      await submitRun(
+        email,
+        startDate,
+        distance_km,
+        stepsValue
+      );
+      toast({
+        title: "Corrida submetida!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      // Optionally reset fields or redirect here
+    } catch (err) {
+      toast({
+        title: "Erro ao submeter corrida",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
 
     return (
       <Box
@@ -361,6 +456,14 @@ export default function AuthBox({ type = "main" }) {
                 <Radio value="no" colorScheme="orange">Não</Radio>
               </Stack>
             </RadioGroup>
+          <FormControl>
+            <FormLabel>Nome</FormLabel>
+            <Input
+              placeholder="Nome"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+          </FormControl>
           </FormControl>
           <Input
             placeholder={isGalpWorker === "yes" ? "Email Galp" : "Email"}
@@ -370,15 +473,41 @@ export default function AuthBox({ type = "main" }) {
           />
           {/* Kms field, only allow numbers and decimals */}
           <FormControl>
-            <FormLabel>Kms Percorridos</FormLabel>
-            <Input
-              placeholder="Introduza os kms percorridos"
-              value={kms}
-              onChange={handleKmsChange}
-              inputMode="decimal"
-            />
+            <FormLabel>Tipo de registo</FormLabel>
+            <RadioGroup value={distanceType} onChange={setDistanceType}>
+              <Stack direction="row">
+                <Radio value="kms" colorScheme="orange">Kms</Radio>
+                <Radio value="steps" colorScheme="orange">Passos</Radio>
+              </Stack>
+            </RadioGroup>
           </FormControl>
           {/* Single booking-style date range field */}
+          
+          {distanceType === "kms" && (
+            <FormControl>
+              <FormLabel>Kms Percorridos</FormLabel>
+              <Input
+                placeholder="Introduza os kms percorridos"
+                value={kms}
+                onChange={e => setKms(e.target.value.replace(/[^0-9.]/g, ""))}
+                inputMode="decimal"
+              />
+            </FormControl>
+          )}
+          
+          {distanceType === "steps" && (
+            <FormControl>
+              <FormLabel>Passos Percorridos</FormLabel>
+              <Input
+                placeholder="Introduza o número de passos"
+                value={steps}
+                onChange={e => setSteps(e.target.value.replace(/\D/, ""))}
+                inputMode="numeric"
+              />
+            </FormControl>
+          )}
+
+          {/* Calendar booking style date range */}
           <FormControl>
             <FormLabel>Data da Corrida (início e fim)</FormLabel>
             <DateRangeField value={dateRange} onChange={setDateRange} />
@@ -438,3 +567,4 @@ export default function AuthBox({ type = "main" }) {
 
   return null;
 }
+

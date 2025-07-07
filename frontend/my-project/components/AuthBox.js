@@ -603,44 +603,41 @@ if (profile) {
             )}
           </HStack>
           {showImageField && (
-            <FormControl>
-              <FormLabel>Anexe uma imagem como comprovativo</FormLabel>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '40px',
-                  opacity: 0,
-                  cursor: 'pointer',
-                  display: 'block',
-                }}
-                id="image-upload"
-                tabIndex={-1}
-              />
-              <Flex
-                as="label"
-                htmlFor="image-upload"
-                align="center"
-                justify="center"
-                borderWidth="1px"
-                borderRadius="md"
-                w="100%"
-                h="40px"
-                position="relative"
-                bg="white"
-                cursor="pointer"
-                tabIndex={0}
-                _hover={{ borderColor: "orange.400" }}
-              >
-                <Text color={imageFile ? "gray.800" : "gray.400"} fontSize="sm" w="100%" textAlign="center">
-                  {imageFile ? imageFile.name : "Nenhum ficheiro selecionado"}
-                </Text>
-              </Flex>
-            </FormControl>
-          )}
+          <FormControl>
+               <FormLabel>Anexe uma imagem como comprovativo</FormLabel>
+               <input
+                 type="file"
+                 id="image-upload"
+                 accept="image/*"
+                 onChange={handleImageChange}
+                 style={{ display: "none" }}
+               />
+               <Flex
+                 as="label"
+                 htmlFor="image-upload"
+                 align="center"
+                 justify="center"
+                 borderWidth="1px"
+                 borderRadius="md"
+                 w="100%"
+                 h="40px"
+                 position="relative"
+                 bg="white"
+                 cursor="pointer"
+                 tabIndex={0}
+                 _hover={{ borderColor: "orange.400" }}
+               >
+                 <Text
+                   color={imageFile ? "gray.800" : "gray.400"}
+                   fontSize="sm"
+                   w="100%"
+                   textAlign="center"
+                 >
+                   {imageFile ? imageFile.name : "Nenhum ficheiro selecionado"}
+                 </Text>
+               </Flex>
+             </FormControl>
+           )}
           <FormControl>
             <FormLabel>Data da Corrida (início e fim)</FormLabel>
             <DateRangeField

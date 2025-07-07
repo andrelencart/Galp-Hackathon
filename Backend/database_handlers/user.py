@@ -87,20 +87,28 @@ def add_run_entry(data):
     council = data.get("council")
     group_type = data.get("group_type")
     activity = data.get("activity")
+    URL_proof=data.get("image_url") 
     session = SessionLocal()
     try:
         profile = session.query(Profile).filter_by(email=email).first() if email else None
 
-        if not distance and steps:
-            distance = round(int(steps) / 1312, 2)
-
+        distance = float(distance) if distance not in [None, ""] else None
+        steps = int(steps) if steps not in [None, ""] else None
+        
+        if distance is None:
+            if steps is not None:
+                distance = round(steps / 1400, 2)
+            else:
+                return {"error": "Missing distance and steps in run entry"}, 400
+        
         if profile:
             # Save only run info, link to profile
             run_log = RunningLogs(
                 profile_id=profile.id,
                 date=datetime.strptime(run_date, "%Y-%m-%d").date(),
                 submitted_at=datetime.now(),
-                km=distance
+                km=distance,
+                URL_proof=URL_proof
             )
             session.add(run_log)
         else:
@@ -124,7 +132,8 @@ def add_run_entry(data):
                 guest_id=guest.id,
                 date=datetime.strptime(run_date, "%Y-%m-%d").date(),
                 submitted_at=datetime.now(),
-                km=distance
+                km=distance,
+                URL_proof=URL_proof
             )
             session.add(run_log)
 

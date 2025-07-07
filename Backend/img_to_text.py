@@ -37,7 +37,7 @@ def image_to_text():
         #     return jsonify({"error": f"Image too small. Minimum size: {min_width}x{min_height}px"}),
         text = pytesseract.image_to_string(img)
         km_matches, steps_matches = extract_distance(text)
-
+        # print(km_matches, steps_matches)
         distance_km = None
         distance_type = None
         original_value = None

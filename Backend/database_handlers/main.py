@@ -186,24 +186,29 @@ def register():
         google_email = session.get("google_email")
         return render_template('register.html', name=google_name, email=google_email)
 
+# @app.route("/add_run", methods=["POST"])
+# def add_run():
+#     data = request.json
+#     valid = data.get("valid", 1)
+#     run_log = RunningLogs(
+#         profile_id=data.get("profile_id"),
+#         guest_id=data.get("guest_id", None),
+#         date=data.get("date"),  # Make sure date is in correct format (YYYY-MM-DD)
+#         submitted_at=datetime.utcnow(),
+#         km=data.get("distance_km"),
+#         # steps=data.get("steps"),
+#         people_count=data.get("people_count"),
+#         valid=valid,  # or set as needed
+#         URL_proof=data.get("image_url")  # Accept image_url from frontend
+#     )
+#     db.session.add(run_log)
+#     db.session.commit()
+#     return jsonify({"message": "Run added!"}), 201
+
 @app.route("/add_run", methods=["POST"])
 def add_run():
     data = request.json
-    valid = data.get("valid", 1)
-    run_log = RunningLogs(
-        profile_id=data.get("profile_id"),
-        guest_id=data.get("guest_id", None),
-        date=data.get("date"),  # Make sure date is in correct format (YYYY-MM-DD)
-        submitted_at=datetime.utcnow(),
-        km=data.get("distance_km"),
-        # steps=data.get("steps"),
-        people_count=data.get("people_count"),
-        valid=valid,  # or set as needed
-        URL_proof=data.get("image_url")  # Accept image_url from frontend
-    )
-    db.session.add(run_log)
-    db.session.commit()
-    # result, status = add_run_entry(data)
+    add_run_entry(data)
     return jsonify({"message": "Run added!"}), 201
 
 if __name__ == "__main__":

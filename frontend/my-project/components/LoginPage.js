@@ -11,7 +11,6 @@ export default function LoginPage() {
     <Flex direction="column" minH="100vh" h="100vh" overflow="hidden">
       <Header />
       <Flex flex={1} direction={{ base: "column", md: "row" }} w="100vw" h="100%" minH="0" overflow="hidden">
-        {/* Left Side with background image and instructions */}
         <Box
           flex="1 1 0%"
           position="relative"
@@ -20,7 +19,6 @@ export default function LoginPage() {
           w="100%"
           overflow="hidden"
         >
-          {/* Background image */}
           <Image
             src="/placeholder.png"
             alt="Placeholder"
@@ -59,30 +57,43 @@ export default function LoginPage() {
               maxW="md"
               px={{ base: 6, md: 12 }}
             >
-              <Text color="white" fontWeight="bold" fontSize="24px" textAlign="center" w="100%">
-                Como participar?
-              </Text>
-              <OrderedList color="white" fontSize="md" spacing={3} textAlign="left" w="100%">
-                <ListItem>
-                  <Text color="white" fontWeight="bold">
-                    Faça Login ou carregue em Submeter corrida sem login.
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text color="white" fontWeight="bold">
-                    Preencha todos os campos e dê upload de um comprovativo fotográfico.
-                  </Text>
-                </ListItem>
-                <ListItem>
-                  <Text color="white" fontWeight="bold">
-                    Por cada Km percorrido uma refeição será doada.
-                  </Text>
-                </ListItem>
-              </OrderedList>
+                           <Box
+               bg="rgba(0,0,0,0.7)"
+               borderRadius="lg"
+               boxShadow="lg"
+               p={8}
+               w="100%"
+               maxW="400px"
+               mx="auto"
+               textAlign="center"
+               zIndex={3}
+               border="2px solid"
+               borderColor="#F6731B"
+             >
+               <Text color="#FFFFFF" fontWeight="bold" fontSize="24px" textAlign="center" w="100%">
+                 Como participar?
+               </Text>
+               <OrderedList color="#FFFFFF" fontSize="md" spacing={3} textAlign="left" w="100%" mt={4}>
+                 <ListItem>
+                   <Text color="#FFFFFF" fontWeight="bold">
+                     Faça Login ou carregue em Submeter corrida sem login.
+                   </Text>
+                 </ListItem>
+                 <ListItem>
+                   <Text color="#FFFFFF" fontWeight="bold">
+                     Preencha todos os campos e dê upload de um comprovativo fotográfico.
+                   </Text>
+                 </ListItem>
+                 <ListItem>
+                   <Text color="#FFFFFF" fontWeight="bold">
+                     Por cada Km percorrido uma refeição será doada.
+                   </Text>
+                 </ListItem>
+               </OrderedList>
+             </Box>
             </VStack>
           </Flex>
         </Box>
-        {/* Right Side */}
         <Box
           flex="1 1 0%"
           display="flex"

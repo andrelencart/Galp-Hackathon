@@ -45,7 +45,11 @@ export async function submitRun({
   activity,
   date,
   distance_km,
-  steps
+  steps,
+  image_url,
+  valid,
+  profile_id,
+  guest_id
 }) {
   const res = await fetch(`${apiUrl}/add_run`, {
     method: "POST",
@@ -60,7 +64,11 @@ export async function submitRun({
       activity,
       date,
       distance_km,
-      steps
+      steps,
+      image_url,
+      valid,
+      profile_id,
+      guest_id
     }),
   });
 
@@ -71,6 +79,55 @@ export async function submitRun({
   }
 
   return data;
+}
+
+export async function uploadProofImage({ imageFile, profile_id, people_count }) {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+  if (profile_id) formData.append("profile_id", profile_id);
+  if (people_count) formData.append("people_count", people_count);
+
+  const res = await fetch(`${apiUrl}/api/image-to-text`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Erro ao ler imagem");
+  }
+  return data;
+}
+
+export async function getUserByEmail(email) {
+     const res = await fetch(`${apiUrl}/api/get_user_by_email?email=${encodeURIComponent(email)}`);
+     if (!res.ok) return null;
+     return await res.json(); // null or user object
+   }
+export async function getGuestByEmail(email) {
+      const res = await fetch(`${apiUrl}/api/get_guest_by_email?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return null;
+      return await res.json(); // null or guest object
+   }
+export async function createGuest({ name, email, district, council, country }) {
+  try {
+    const res = await fetch(`${apiUrl}/api/create_guest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, district, council, country })
+    });
+    
+    if (!res.ok) {
+      // Try to get error message from response
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to create guest");
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error("Error creating guest:", error);
+    throw error; // Re-throw to let the caller handle it
+  }
 }
 
 // export async function registerUser(name, email, password) {

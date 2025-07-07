@@ -74,6 +74,9 @@ def register_user(data):
         session.close()
 
 def add_run_entry(data):
+    run_date = data.get("date")
+    if not run_date:
+        return {"error": "Missing date in run entry"}, 400
     email = data.get("run_email") or data.get("email")
     name = data.get("name")
     run_date = data.get("date")

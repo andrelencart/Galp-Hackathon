@@ -30,7 +30,6 @@ export default function HomePage() {
         minH="0"
         overflow="hidden"
       >
-        {/* Caixa do lado esquerdo */}
         <Box
           flex="1 1 0%"
           position="relative"
@@ -39,7 +38,6 @@ export default function HomePage() {
           w="100%"
           overflow="hidden"
         >
-          {/* Imagem de background */}
           <Image
             src="/placeholder.png"
             alt="Placeholder"
@@ -52,7 +50,6 @@ export default function HomePage() {
             zIndex={0}
             pointerEvents="none"
           />
-          {/* Overlay de background para melhorar a leitura*/}
           <Box
             position="absolute"
             top={0}
@@ -62,7 +59,6 @@ export default function HomePage() {
             bg="rgba(0,0,0,0.2)"
             zIndex={1}
           />
-          {/* Conteudo */}
           <Flex
             position="absolute"
             zIndex={2}
@@ -81,7 +77,7 @@ export default function HomePage() {
              px={{ base: 6, md: 12 }}
            >
              <Box
-               bg="white"
+               bg="rgba(0,0,0,0.7)"
                borderRadius="lg"
                boxShadow="lg"
                p={8}
@@ -90,23 +86,25 @@ export default function HomePage() {
                mx="auto"
                textAlign="center"
                zIndex={3}
+               border="2px solid"
+               borderColor="#F6731B"
              >
-               <Text color="#FF7900" fontWeight="bold" fontSize="24px" textAlign="center" w="100%">
+               <Text color="#FFFFFF" fontWeight="bold" fontSize="24px" textAlign="center" w="100%">
                  Como participar?
                </Text>
-               <OrderedList color="#FF7900" fontSize="md" spacing={3} textAlign="left" w="100%" mt={4}>
+               <OrderedList color="#FFFFFF" fontSize="md" spacing={3} textAlign="left" w="100%" mt={4}>
                  <ListItem>
-                   <Text color="#FF7900" fontWeight="bold">
+                   <Text color="#FFFFFF" fontWeight="bold">
                      Faça Login ou carregue em Submeter corrida sem login.
                    </Text>
                  </ListItem>
                  <ListItem>
-                   <Text color="#FF7900" fontWeight="bold">
+                   <Text color="#FFFFFF" fontWeight="bold">
                      Preencha todos os campos e dê upload de um comprovativo fotográfico.
                    </Text>
                  </ListItem>
                  <ListItem>
-                   <Text color="#FF7900" fontWeight="bold">
+                   <Text color="#FFFFFF" fontWeight="bold">
                      Por cada Km percorrido uma refeição será doada.
                    </Text>
                  </ListItem>
@@ -115,7 +113,6 @@ export default function HomePage() {
            </VStack>
           </Flex>
         </Box>
-        {/*Lado Direito*/}
         <Box
           flex="1 1 0%"
           display="flex"

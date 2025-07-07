@@ -17,7 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 
-const username = "André Lencart";
+const username = "André";
 
 function useFirstTimeUser(user) {
   const [firstTime, setFirstTime] = useState(true);
@@ -39,7 +39,7 @@ function useFirstTimeUser(user) {
 
 function usePersonalBest(user) {
   return {
-    distance: 18.9,
+    distance: 15.8,
     unit: "Km",
     date: "12/11/2025",
   };
@@ -48,7 +48,7 @@ function usePersonalBest(user) {
 export default function ProfilePage() {
   const userLevel = 3;
   const expPercent = 65;
-  const mealsGiven = 18;
+  const mealsGiven = 15;
   const mealsTotal = 1000000;
   const mealsProgress = mealsGiven / mealsTotal;
 

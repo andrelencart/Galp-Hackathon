@@ -32,12 +32,16 @@ def image_to_text():
 
         file = request.files['image']
         img = Image.open(file.stream)
+        min_width, min_height = 300, 100
+        # if img.width < min_width or img.height < min_height:
+        #     return jsonify({"error": f"Image too small. Minimum size: {min_width}x{min_height}px"}),
         text = pytesseract.image_to_string(img)
         km_matches, steps_matches = extract_distance(text)
 
         distance_km = None
         distance_type = None
         original_value = None
+
 
         if km_matches:
             distance_km = float(km_matches[0])
@@ -48,7 +52,6 @@ def image_to_text():
             distance_type = "steps"
             original_value = str(steps_matches[0])
         else:
-            print("OCR OUTPUT:", repr(text)) 
             return jsonify({'error': 'Neither km nor steps found', 'ocr_text': text}), 400
 
         image_save_path = current_app.config.get("IMAGE_SAVE_PATH", "/data/images")
@@ -65,18 +68,18 @@ def image_to_text():
         people_count = request.form.get('people_count', None)
         valid = 1   # Default to valid
 
-        run_log = RunningLogs(
-            profile_id=profile_id,
-            guest_id=guest_id,
-            date=date.today(),
-            submitted_at=datetime.utcnow(),
-            km=distance_km,
-            people_count=people_count,
-            valid=valid,
-            URL_proof=image_url
-        )
-        db.session.add(run_log)
-        db.session.commit()
+        # run_log = RunningLogs(
+        #     profile_id=profile_id,
+        #     guest_id=guest_id,
+        #     date=date.today(),
+        #     submitted_at=datetime.utcnow(),
+        #     km=distance_km,
+        #     people_count=people_count,
+        #     valid=valid,
+        #     URL_proof=image_url
+        # )
+        # db.session.add(run_log)
+        # db.session.commit()
 
         return jsonify({
             'distance': distance_km,

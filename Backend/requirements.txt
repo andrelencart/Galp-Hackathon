@@ -39,3 +39,5 @@ pytz==2020.1
 six==1.15.0
 pytesseract>=0.3.10,<0.4.0
 mysql-connector-python
+pymysql
+cryptography

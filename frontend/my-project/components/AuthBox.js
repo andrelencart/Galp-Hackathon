@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { districts, councilsByDistrict } from "../utils/portugal.js";
 import { useToast } from "@chakra-ui/react";
-import { registerUser, loginUser, submitRun } from "../utils/api";
+import { registerUser, loginUser, submitRun, uploadProofImage, getGuestByEmail, getUserByEmail, createGuest } from "../utils/api";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -175,6 +175,12 @@ export default function AuthBox({ type = "main" }) {
   const [kms, setKms] = useState("");
   const [steps, setSteps] = useState("");
   const [distanceType, setDistanceType] = useState("kms");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [guestId, setGuestId] = useState(null);
+  const [group_type, setGroupType] = useState("");
+  const [activity, setActivity] = useState("");
+
   // Calendar fields in dd/mm/yyyy
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -220,6 +226,7 @@ export default function AuthBox({ type = "main" }) {
   const showImageField =
     (distanceType === "kms" && !isNaN(kmsValue) && kmsValue >= 10) ||
     (distanceType === "steps" && !isNaN(stepsValueInt) && stepsValueInt >= 14000);
+  
 
   // File input is always present, but the UI is only visible if showImageField is true
   function handleImageChange(e) {
@@ -257,7 +264,7 @@ export default function AuthBox({ type = "main" }) {
         duration: 3000,
         isClosable: true,
       });
-      router.push("/"); // or wherever you want to redirect
+      router.push("/profile"); // or wherever you want to redirect
     } catch (err) {
       toast({
         title: "Erro no login",
@@ -448,18 +455,60 @@ if (type === "register") {
   );
 }
 
+// const handleReadImage = async () => {
+//   if (!imageFile) {
+//     toast({
+//       title: "Selecione uma imagem",
+//       status: "warning",
+//       duration: 2000,
+//       isClosable: true,
+//     });
+//     return;
+//   }
+//   try {
+//     const result = await uploadProofImage({
+//       imageFile,
+//       profile_id: profile_id,
+//       people_count: people_count || null,
+//     });
+//     if (result.distance_type === "km") {
+//       setKms(result.distance);
+//       setDistanceType("kms");
+//     } else if (result.distance_type === "steps") {
+//       setSteps(result.original_value);
+//       setDistanceType("steps");
+//     }
+//     toast({
+//       title: "Valor lido da imagem!",
+//       description: `${result.distance} ${result.distance_type === "km" ? "kms" : "passos"}`,
+//       status: "success",
+//       duration: 2500,
+//       isClosable: true,
+//     });
+//   } catch (err) {
+//     toast({
+//       title: "Erro ao ler imagem",
+//       description: err.message,
+//       status: "error",
+//       duration: 3000,
+//       isClosable: true,
+//     });
+//   }
+// };
   // --- SUBMIT PAGE ---
   if (type === "submit") {
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+   const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("handleSubmit called"); 
 
-      // Convert dd/mm/yyyy to yyyy-mm-dd for backend
-      const backendStart = startDate ? formatDateYMD(startDate) : '';
-      const backendEnd = endDate ? formatDateYMD(endDate) : '';
+  // Convert dd/mm/yyyy to yyyy-mm-dd for backend
+  const backendStart = startDate ? formatDateYMD(startDate) : '';
+  const backendEnd = endDate ? formatDateYMD(endDate) : '';
 
-      const distance_km = distanceType === "kms" ? kms : null;
-      const stepsValue = distanceType === "steps" ? steps : null;
+  const distance_km = distanceType === "kms" ? kms : null;
+  const stepsValue = distanceType === "steps" ? steps : null;
 
+  // 1. Validate distance
   if (!distance_km && !stepsValue) {
     toast({
       title: "Preencha Kms ou Passos",
@@ -470,6 +519,45 @@ if (type === "register") {
     return;
   }
 
+  // 2. Check if user (profile) or guest exists, or create guest
+  let guestId = null;
+  let profileId = null;
+
+  
+  // 3. Handle image upload
+  let image_url = null;
+  if (imageFile) {
+	  try {
+      const result = await uploadProofImage({
+		  imageFile,
+		});
+		image_url = result.image_url;
+    } catch (err) {
+		toast({
+			title: "Erro ao carregar imagem",
+			description: err.message,
+			status: "error",
+			duration: 3000,
+			isClosable: true,
+		});
+		return;
+    }
+}
+
+// 4. Submit the run
+const profile = await getUserByEmail(email);
+if (profile) {
+  profileId = profile.id;
+} else {
+  const guest = await getGuestByEmail(email);
+  if (guest) {
+	guestId = guest.id;
+  } else {
+    console.log("Creating guest with:", { name, email, district, council, country });
+    const newGuest = await createGuest({  name, email, district, council, country });
+    guestId = newGuest.id;
+  }
+}
   try {
     await submitRun({
       run_email: email,
@@ -477,11 +565,15 @@ if (type === "register") {
       country,
       district,
       council,
-    //   group_type: groupType,
-    //   activity,
+      group_type,
+      activity,
       date: backendStart,
       distance_km,
-      steps: stepsValue
+      steps: stepsValue,
+      image_url,
+      valid: 1,
+      guest_id: guestId,
+      profile_id: profileId
     });
     toast({
       title: "Corrida submetida!",
@@ -489,7 +581,7 @@ if (type === "register") {
       duration: 3000,
       isClosable: true,
     });
-    setImageFile(null); // Optional: reset image after submit
+    setImageFile(null);
   } catch (err) {
     toast({
       title: "Erro ao submeter corrida",
@@ -613,6 +705,16 @@ if (type === "submit") {
             </Text>
           </Flex>
         )}
+        {/*--- OCR BUTTON ADDED ---*/}
+          {/* <Button
+            mt={2}
+            colorScheme="orange"
+            w="100%"
+            onClick={handleReadImage}
+            isDisabled={!imageFile}
+          >
+            Ler Kms/Passos da Imagem
+          </Button> */}
       </FormControl>
         {/* Calendar booking style date range */}
         <FormControl>

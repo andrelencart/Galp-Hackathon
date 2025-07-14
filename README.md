@@ -1,8 +1,8 @@
-# DevAndar---Galp
+#  DevAndar
 
-DevAndar---Galp is a web application developed for the Galp Hackathon. Our group took on the challenge of building this project using several new technologies—such as Docker Compose, Next.js, and Chakra UI—for the very first time, all within one week.
+ DevAndar is our group's name and this web application was developed as part of the "Todos os Passos Contam" initiative by Galp for their hackathon. Our group took on the challenge of building this project using several new technologies—such as Docker Compose, Next.js, and Chakra UI.
 
-The main goal of DevAndar---Galp is to encourage physical activity by allowing users to submit kilometers or steps walked, track their progress, and highlight collective achievements such as meals donated. While the frontend successfully delivers the core message and vision we wanted to share, some features—like the profile page—are not fully integrated with the backend due to time constraints.
+The main goal of "Todos os Passos Contam" is to encourage physical activity by allowing users to submit kilometers or steps walked, track their progress, and highlight collective achievements such as meals donated. While the frontend successfully delivers the core message and vision we wanted to share, some features—like the profile page—are not fully integrated with the backend due to time constraints.
 
 ## Notes on Project Status
 
@@ -13,7 +13,7 @@ The main goal of DevAndar---Galp is to encourage physical activity by allowing u
 
 ## Future Plans
 
-Looking forward, we hope to expand DevAndar---Galp with:
+Looking forward, we hope to expand the site with:
 - Group logins for teams and organizations
 - Authentication and integration with fitness apps
 - Social features, such as connecting with friends or forming a social hub
